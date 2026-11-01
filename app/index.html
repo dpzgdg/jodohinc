@@ -40,7 +40,7 @@ em{font-style:italic;color:var(--gold-hi)}
 body.notab #tabs{transform:translateY(110%)}
 
 /* tab bar */
-#tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;height:calc(64px + var(--sb));padding-bottom:var(--sb);display:grid;grid-template-columns:repeat(5,1fr);
+#tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;height:calc(64px + var(--sb));padding-bottom:var(--sb);display:grid;grid-template-columns:repeat(4,1fr);
   background:rgba(22,6,10,.86);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line);transition:transform .35s}
 #tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--mute);position:relative}
 #tabs svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
@@ -189,20 +189,11 @@ p.sub{color:var(--mute);font-size:15px;line-height:1.5;margin-top:10px}
 .pcard .tag{position:absolute;top:-10px;right:18px;font-size:10px;font-weight:800;letter-spacing:.14em;background:var(--wine);color:var(--gold-hi);padding:6px 9px;border-radius:6px}
 .pcard.hot .btn{background:#2a0d13;color:var(--gold-hi)}
 
-/* presenter */
-.timer{font:500 76px/1 var(--serif);text-align:center;font-variant-numeric:tabular-nums;margin-top:6px;transition:color .4s}
-.timer.warn{color:var(--gold-hi)}.timer.over{color:#ff7d92}
-.tline{height:4px;border-radius:4px;background:var(--line);margin:12px 0 4px;position:relative;overflow:hidden}
-.tline i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--gold),var(--rose))}
-.tlabels{position:relative;height:14px;font-size:11px;color:var(--mute)}.tlabels span{position:absolute;transform:translateX(-50%)}.tlabels span:first-child{transform:none}.tlabels span:last-child{transform:translateX(-100%)}
-.note{margin-top:16px;padding:18px;border-radius:20px;background:rgba(244,232,212,.06);border:1px solid var(--line);min-height:190px}
-.note .s{display:flex;justify-content:space-between;align-items:baseline}
-.note .s b{font:500 26px/1.05 var(--serif)}
-.note .s span{color:var(--gold);font-weight:700;font-size:13px}
-.note p{font-size:17px;line-height:1.55;margin-top:10px}
-.team{margin-top:14px;display:grid;gap:6px}
-.team div{display:flex;gap:12px;align-items:baseline;font-size:14.5px}
-.team b{font:italic 600 22px/1 var(--serif);color:var(--gold-hi);width:28px}
+/* credits */
+.credits{margin-top:28px;padding-top:18px;border-top:1px solid var(--line)}
+.team{margin-top:10px;display:grid;gap:6px}
+.team div{display:flex;gap:12px;align-items:baseline;font-size:14px;color:var(--mute)}
+.team b{font:italic 600 20px/1 var(--serif);color:var(--gold-hi);width:26px}
 </style>
 </head>
 <body>
@@ -210,7 +201,7 @@ p.sub{color:var(--mute);font-size:15px;line-height:1.5;margin-top:10px}
 
   <!-- HOME -->
   <section class="screen" id="home">
-    <div class="top"><div class="brand"><img src="../media/logo.svg" alt="">JODOH INC.</div><button class="chip" data-go="presenter">Presenter</button></div>
+    <div class="top"><div class="brand"><img src="../media/logo.svg" alt="">JODOH INC.</div></div>
     <div class="kick" id="greet">Selamat datang</div>
     <h1>Match people,<br><em>not just profiles.</em></h1>
     <div class="hero"><div class="stack"><img src="img/w4.jpg" alt=""><img src="img/m6.jpg" alt=""></div>
@@ -222,7 +213,8 @@ p.sub{color:var(--mute);font-size:15px;line-height:1.5;margin-top:10px}
       <button class="tile" data-go="standar"><span class="ic">⚖</span><div><b>Cek Standar</b><br><small>Yang kamu minta vs yang kamu tawarkan.</small></div></button>
       <button class="tile" data-go="plans"><span class="ic">◆</span><div><b>Paket</b><br><small>Mulai Rp99.000. Perasaan tidak termasuk.</small></div></button>
     </div>
-    <p class="sub" style="font-size:12px;margin-top:22px;text-align:center">Semua kandidat adalah profil fiktif untuk demo presentasi.<br>Data kamu hanya disimpan di HP ini.</p>
+    <div class="credits"><div class="kick">Tim JODOH Inc.</div><div class="team" id="team"></div></div>
+    <p class="sub" style="font-size:12px;margin-top:22px;text-align:center">Semua kandidat adalah profil fiktif.<br>Jawabanmu hanya tersimpan di HP ini.</p>
   </section>
 
   <!-- QUIZ -->
@@ -259,9 +251,6 @@ p.sub{color:var(--mute);font-size:15px;line-height:1.5;margin-top:10px}
 
   <!-- PLANS -->
   <section class="screen" id="plans"></section>
-
-  <!-- PRESENTER -->
-  <section class="screen" id="presenter"></section>
 </div>
 
 <nav id="tabs">
@@ -269,7 +258,6 @@ p.sub{color:var(--mute);font-size:15px;line-height:1.5;margin-top:10px}
   <button data-go="swipe"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="3"/><path d="M12 15.5s-3.5-2-3.5-4.3A1.9 1.9 0 0 1 12 10a1.9 1.9 0 0 1 3.5 1.2c0 2.3-3.5 4.3-3.5 4.3z"/></svg>Kandidat</button>
   <button data-go="matches"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Match<span class="dot" id="mDot"></span></button>
   <button data-go="plans"><svg viewBox="0 0 24 24"><path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18M9 3l3 18 3-18"/></svg>Paket</button>
-  <button data-go="presenter"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>Presenter</button>
 </nav>
 
 <div id="match"></div>
@@ -316,16 +304,6 @@ const PLANS=[
  {id:"serius",n:"Serius Nih?",p:599000,f:["Matchmaking personal","First Date Concierge","Evaluasi setelah kencan"]}
 ];
 
-const NOTES=[
- ["JODOH Inc.","Buka dengan tenang: “Kami tidak menjanjikan cinta sejati. Kami membantu mengurangi kandidat yang tidak tepat.” Perkenalkan tim (nomor absen), lalu nama perusahaan."],
- ["Lebih rumit dari skripsi","Skripsi setidaknya jelas judulnya. Pasangan: cocok fisik, beda visi. Cocok visi, beda agama. Cocok semua, ternyata belum selesai dengan masa lalunya. Di situ JODOH Inc. masuk."],
- ["Masalahnya","Bertemu orang baru makin mudah, yang cocok tetap sulit. Kriteria makin panjang, seperti lowongan direksi. Ditanya apa yang ditawarkan: “aku orangnya memang begini.” Boleh standar tinggi, asal seimbang."],
- ["Cara kerja","Tiga layanan: Assessment, Matchmaking, First Date Concierge. Kami tanya: kamu cari pasangan hidup atau teman isi waktu luang? Kadang yang satu cari pasangan hidup, yang lain belum bisa memutuskan mau makan apa."],
- ["Laporan kecocokan","Contoh profil fiktif. Kami ukur nilai, tujuan, cara komunikasi. Selera kopi beda jauh, dan itu tidak apa-apa: bobotnya nol."],
- ["Paket","Tiga paket. Pendapatan dari konsultasi, paket matchmaking, dan add-on perencanaan kencan. Harga transparan. Tegaskan: tidak termasuk jaminan dapat pasangan. Kami bukan pabrik perasaan."],
- ["Kenapa JODOH Inc.","Personal, terarah, transparan. Data klien dikelola dengan persetujuan. Kami tidak menjanjikan setiap pertemuan berakhir romantis; keputusan tetap di tangan kedua orang."],
- ["Penutup","Kami tidak bisa menjamin jodoh. Tapi bisa membantu Anda tidak menghabiskan tiga bulan untuk orang yang sejak awal tidak serius. (jeda) “JODOH Inc.: mencari pasangan, bukan menambah daftar mantan.” Terima kasih."]
-];
 const TEAM=[["12","Rachel Christie"],["13","Michaela"],["14","Kayla Fausta Natania Sada"],["15","Naisyirah Ramadhani Tuasikal"],["18","Rizal Fahmi"]];
 
 const DATES={
@@ -618,32 +596,6 @@ R.plans=()=>{
     b.textContent="Memproses…";setTimeout(()=>{b.textContent="✓ Terdaftar (simulasi)";confetti();toast(`${p.n} aktif. Tidak ada uang yang berpindah. Perasaan juga belum.`)},700)});
 };
 
-/* ================= PRESENTER ================= */
-const TARGET=6*60;let tStart=null,tAcc=0,tInt=null,slide=0,wake=null;
-function elapsed(){return tAcc+(tStart?(Date.now()-tStart)/1000:0)}
-R.presenter=()=>{
-  $("#presenter").innerHTML=`<div class="top"><div class="kick">Mode presenter</div><a class="chip" href="../" target="_blank" style="color:inherit;text-decoration:none">Buka deck ↗</a></div>
-    <div class="timer" id="tm">0:00</div>
-    <div class="tline"><i id="tl"></i></div><div class="tlabels"><span style="left:0">0:00</span><span style="left:71.4%">5:00</span><span style="left:85.7%">6:00</span><span style="left:100%">7:00</span></div>
-    <div class="row" style="margin-top:14px"><button class="btn sm" id="tGo">Mulai</button><button class="btn sm ghost" id="tRe" style="width:120px">Reset</button></div>
-    <div class="note"><div class="s"><b id="nT"></b><span id="nN"></span></div><p id="nP"></p></div>
-    <div class="row" style="margin-top:12px"><button class="btn sm ghost" id="pPrev">‹ Sebelumnya</button><button class="btn sm" id="pNext">Berikutnya ›</button></div>
-    <div class="panel" style="margin-top:16px"><div class="kick">Tim</div><div class="team">${TEAM.map(([n,m])=>`<div><b>${n}</b>${m}</div>`).join("")}</div></div>
-    <p class="sub" style="font-size:12px;text-align:center;margin-top:14px">Layar tetap menyala selama timer berjalan.</p>`;
-  const show=()=>{$("#nT").textContent=NOTES[slide][0];$("#nN").textContent=`${slide+1} / ${NOTES.length}`;$("#nP").textContent=NOTES[slide][1]};
-  const tick=()=>{const e=elapsed(),m=Math.floor(e/60),s=Math.floor(e%60),el=$("#tm");if(!el)return;
-    el.textContent=`${m}:${String(s).padStart(2,"0")}`;el.className="timer"+(e>420?" over":e>300?" warn":"");$("#tl").style.width=Math.min(e/420*100,100)+"%"};
-  const setBtn=()=>{$("#tGo").textContent=tStart?"Jeda":tAcc?"Lanjut":"Mulai"};
-  $("#tGo").onclick=async()=>{if(tStart){tAcc=elapsed();tStart=null;clearInterval(tInt);releaseWake()}else{tStart=Date.now();tInt=setInterval(tick,250);
-    try{wake=await navigator.wakeLock?.request("screen")}catch(e){}}setBtn()};
-  $("#tRe").onclick=()=>{tStart=null;tAcc=0;clearInterval(tInt);releaseWake();tick();setBtn();slide=0;show()};
-  $("#pPrev").onclick=()=>{slide=Math.max(0,slide-1);show()};
-  $("#pNext").onclick=()=>{slide=Math.min(NOTES.length-1,slide+1);show()};
-  show();tick();setBtn();if(tStart){clearInterval(tInt);tInt=setInterval(tick,250)}
-};
-function releaseWake(){try{wake&&wake.release()}catch(e){}wake=null}
-document.addEventListener("visibilitychange",async()=>{if(document.visibilityState==="visible"&&tStart){try{wake=await navigator.wakeLock?.request("screen")}catch(e){}}});
-
 /* ================= share card ================= */
 async function shareCard(p,st){
   await document.fonts.ready;
@@ -679,7 +631,8 @@ function confetti(){
 
 /* ================= boot ================= */
 updDot();
-go(location.hash==="#presenter"?"presenter":"home");
+$("#team").innerHTML=TEAM.map(([n,m])=>`<div><b>${n}</b>${m}</div>`).join("");
+go("home");
 if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
 </script>
 </body>

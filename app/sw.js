@@ -1,4 +1,4 @@
-const CACHE = "jodoh-app-v1";
+const CACHE = "jodoh-app-v2";
 const SHELL = [
   "./", "index.html", "manifest.webmanifest", "../media/logo.svg",
   "icons/apple-touch-icon.png", "icons/icon-192.png", "icons/icon-512.png",
