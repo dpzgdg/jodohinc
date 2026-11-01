@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JODOH Inc.</title>
+<meta name="description" content="JODOH Inc. — Jasa Optimalisasi Dating & Orientasi Hubungan. Match people, not just profiles.">
+<link rel="icon" href="media/logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0d0608; --deep:#1c070c; --maroon:#5a1424; --wine:#7a1f33;
+  --cream:#f4e8d4; --mute:#c8b49a; --gold:#d2ab6c; --gold-hi:#f2dba6; --gold-lo:#8a6234;
+  --serif:"Cormorant Garamond",Georgia,serif; --sans:"Manrope",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--ink);color:var(--cream);font-family:var(--sans);overflow:hidden}
+body{-webkit-font-smoothing:antialiased}
+
+/* ---------- background layer ---------- */
+#bg{position:fixed;inset:0;z-index:0}
+#bg .layer{position:absolute;inset:0;opacity:0;transition:opacity 1.2s ease}
+#bg .layer.on{opacity:1}
+#bg video,#bg img{width:100%;height:100%;object-fit:cover;display:block}
+#bg .blur img{filter:blur(28px) saturate(1.2) brightness(.42);transform:scale(1.15)}
+#bg .full video{filter:brightness(.62) saturate(1.05)}
+#bg::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 90% at 50% 40%,transparent 30%,rgba(13,6,8,.85) 100%),
+             linear-gradient(180deg,rgba(13,6,8,.35),transparent 30%,transparent 70%,rgba(13,6,8,.7))}
+#grain{position:fixed;inset:-50%;z-index:3;pointer-events:none;opacity:.07;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation:grain 1s steps(6) infinite}
+@keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-5%,3%)}50%{transform:translate(4%,-4%)}75%{transform:translate(-3%,-2%)}100%{transform:translate(2%,5%)}}
+
+#gl{position:fixed;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+
+/* ---------- stage (fixed 1600x900, scaled to fit) ---------- */
+#stage{position:fixed;left:50%;top:50%;width:1600px;height:900px;z-index:2;transform-origin:50% 50%}
+.slide{position:absolute;inset:0;visibility:hidden;padding:84px 104px}
+.slide.on{visibility:visible}
+
+.kicker{font:600 13px/1 var(--sans);letter-spacing:.32em;text-transform:uppercase;color:var(--gold)}
+.kicker::before{content:"";display:inline-block;width:36px;height:1px;background:var(--gold);vertical-align:middle;margin-right:14px}
+h1,h2,.serif{font-family:var(--serif);font-weight:500;letter-spacing:-.01em}
+h2{font-size:84px;line-height:.98;margin-top:22px}
+h2 em,.gold{font-style:italic;color:var(--gold-hi)}
+p.lead{font-size:22px;line-height:1.5;color:var(--mute);max-width:620px}
+.line{display:block;overflow:hidden;padding-bottom:.08em}
+.line>span{display:inline-block}
+
+.panel{position:absolute;border-radius:6px;overflow:hidden;
+  box-shadow:0 40px 90px -30px rgba(0,0,0,.9),0 0 0 1px rgba(210,171,108,.35)}
+.panel video{width:100%;height:100%;object-fit:cover;display:block}
+.panel::after{content:"";position:absolute;inset:0;box-shadow:inset 0 0 80px rgba(13,6,8,.55)}
+.panel .tag{position:absolute;left:18px;bottom:16px;z-index:2;font:600 11px/1 var(--sans);letter-spacing:.26em;
+  text-transform:uppercase;color:var(--gold-hi);background:rgba(13,6,8,.6);padding:8px 12px;border-radius:2px;backdrop-filter:blur(6px)}
+
+/* ---------- chrome ---------- */
+#hud{position:fixed;inset:auto 0 0 0;z-index:5;display:flex;align-items:center;gap:20px;padding:0 32px 24px;pointer-events:none}
+#hud .brand{display:flex;align-items:center;gap:10px;font:600 12px/1 var(--sans);letter-spacing:.24em;color:var(--mute)}
+#hud .brand img{width:22px}
+#bar{flex:1;height:1px;background:rgba(244,232,212,.15);position:relative}
+#bar i{position:absolute;left:0;top:-.5px;height:2px;background:linear-gradient(90deg,var(--gold-lo),var(--gold-hi));width:0;transition:width .9s cubic-bezier(.7,0,.2,1)}
+#count{font:500 13px/1 var(--sans);letter-spacing:.12em;color:var(--mute);font-variant-numeric:tabular-nums}
+#notes{position:fixed;z-index:6;left:50%;bottom:64px;transform:translate(-50%,20px);width:min(880px,92vw);
+  background:rgba(13,6,8,.88);border:1px solid rgba(210,171,108,.35);backdrop-filter:blur(12px);
+  padding:20px 26px;border-radius:6px;font-size:16px;line-height:1.6;color:var(--cream);opacity:0;pointer-events:none;transition:.35s}
+#notes.on{opacity:1;transform:translate(-50%,0)}
+#notes b{display:block;font:600 11px/1 var(--sans);letter-spacing:.26em;color:var(--gold);margin-bottom:10px}
+#hint{position:fixed;z-index:6;right:32px;top:26px;font:500 12px/1 var(--sans);letter-spacing:.14em;color:rgba(244,232,212,.45);transition:opacity 1s}
+
+/* ---------- 1 cover ---------- */
+.s-cover{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding-bottom:150px}
+.s-cover .mark{width:150px;margin-bottom:26px;filter:drop-shadow(0 8px 30px rgba(210,171,108,.35))}
+.s-cover h1{font-size:168px;line-height:.9;letter-spacing:-.02em}
+.s-cover h1 em{font-size:.62em;color:var(--gold-hi)}
+.s-cover .acr{margin-top:26px;font:500 15px/1 var(--sans);letter-spacing:.42em;text-transform:uppercase;color:var(--mute)}
+.s-cover .acr b{color:var(--gold-hi);font-weight:700}
+.s-cover .tag{margin-top:44px;font:italic 500 34px/1.3 var(--serif);color:var(--cream)}
+.team{position:absolute;left:104px;right:104px;bottom:78px;display:grid;grid-template-columns:repeat(5,auto);justify-content:space-between;
+  padding-top:22px;border-top:1px solid rgba(210,171,108,.3);text-align:left}
+.team div{display:flex;align-items:baseline;gap:12px;font:500 17px/1.25 var(--sans);color:var(--cream);text-shadow:0 2px 14px rgba(13,6,8,.9),0 0 4px rgba(13,6,8,.7)}
+.team b{font:italic 600 30px/1 var(--serif);color:var(--gold-hi);font-variant-numeric:tabular-nums}
+.s-cover .rule{width:0;height:1px;background:var(--gold);margin:40px auto 0}
+
+/* ---------- 2 hook ---------- */
+.s-hook h2{font-size:104px;max-width:880px;margin-top:30px}
+.s-hook .panel{right:104px;top:150px;width:560px;height:315px}
+.vs{position:absolute;left:104px;bottom:120px;width:1392px;display:grid;grid-template-columns:300px 1fr;gap:0;border-top:1px solid rgba(210,171,108,.3)}
+.vs>div{padding:26px 0}
+.vs .k{font:600 12px/1 var(--sans);letter-spacing:.28em;text-transform:uppercase;color:var(--gold)}
+.vs .row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.chip{font:500 19px/1 var(--sans);padding:13px 18px;border:1px solid rgba(244,232,212,.22);border-radius:40px;position:relative;background:rgba(13,6,8,.35)}
+.chip s{text-decoration:none;position:relative}
+.chip .x{position:absolute;left:12px;right:12px;top:50%;height:2px;background:var(--gold);transform:scaleX(0);transform-origin:left}
+.chip.ok{border-color:var(--gold);color:var(--gold-hi)}
+.vs .r2{border-top:1px solid rgba(244,232,212,.08)}
+
+/* ---------- 3 problem ---------- */
+.s-prob h2{font-size:76px;max-width:700px}
+.s-prob .panel{right:104px;top:84px;width:520px;height:292px}
+.job{position:absolute;left:104px;top:330px;width:760px;background:var(--cream);color:#2a0d13;border-radius:4px;padding:34px 40px;
+  box-shadow:0 50px 100px -30px rgba(0,0,0,.85)}
+.job .hd{display:flex;justify-content:space-between;align-items:baseline;border-bottom:2px solid #2a0d13;padding-bottom:14px}
+.job .hd b{font:700 13px/1 var(--sans);letter-spacing:.24em}
+.job .hd span{font:italic 600 30px/1 var(--serif)}
+.job ul{list-style:none;columns:2;column-gap:32px;margin:20px 0 6px}
+.job li{font:500 18px/1.2 var(--sans);padding:9px 0;display:flex;gap:10px;break-inside:avoid}
+.job li i{font-style:normal;color:var(--wine);font-weight:700}
+.job .offer{margin-top:16px;padding-top:16px;border-top:1px dashed rgba(42,13,19,.35)}
+.job .offer small{font:700 12px/1 var(--sans);letter-spacing:.22em;color:var(--wine)}
+.job .offer q{display:block;font:italic 600 40px/1.15 var(--serif);margin-top:8px;min-height:46px}
+.stamp{position:absolute;right:-30px;bottom:44px;font:800 22px/1 var(--sans);letter-spacing:.14em;color:#a3192f;
+  border:3px solid #a3192f;padding:12px 16px;border-radius:4px;transform:rotate(-9deg);opacity:0;mix-blend-mode:multiply;background:rgba(244,232,212,.6)}
+.s-prob .side{position:absolute;right:104px;top:440px;width:520px}
+.s-prob .side li{list-style:none;font:500 20px/1.35 var(--sans);color:var(--mute);padding:16px 0;border-top:1px solid rgba(244,232,212,.12);display:flex;gap:18px}
+.s-prob .side li span{font:italic 600 24px/1 var(--serif);color:var(--gold)}
+
+/* ---------- 4 services ---------- */
+.s-svc .panel{right:104px;top:84px;width:640px;height:360px}
+.s-svc h2{max-width:640px}
+.steps{position:absolute;left:104px;right:104px;bottom:110px;display:grid;grid-template-columns:repeat(3,1fr);gap:40px}
+.steps svg.track{position:absolute;left:0;top:30px;width:100%;height:4px;overflow:visible}
+.step{position:relative;padding-top:74px}
+.step .n{position:absolute;top:0;left:0;width:62px;height:62px;border-radius:50%;border:1px solid var(--gold);display:grid;place-items:center;
+  font:italic 600 26px/1 var(--serif);color:var(--gold-hi);background:var(--deep)}
+.step h3{font:500 40px/1.05 var(--serif)}
+.step p{margin-top:12px;font-size:18px;line-height:1.5;color:var(--mute);max-width:400px}
+.step p em{color:var(--cream);font-style:normal}
+
+/* ---------- 5 match ---------- */
+.s-match h2{font-size:74px;max-width:620px}
+.s-match .panel{left:104px;bottom:96px;width:520px;height:292px}
+.radar{position:absolute;left:740px;top:60px;width:760px;height:760px}
+.radar text{font-family:var(--sans);font-size:15px;fill:var(--mute);font-weight:500}
+.radar .score{font-family:var(--serif);font-size:96px;fill:var(--gold-hi);font-weight:500}
+.legend{position:absolute;left:744px;bottom:70px;display:flex;gap:30px;font-size:15px;color:var(--mute)}
+.legend i{display:inline-block;width:22px;height:3px;vertical-align:middle;margin-right:8px}
+.foot{position:absolute;right:104px;bottom:70px;font:italic 500 20px/1.3 var(--serif);color:var(--gold)}
+
+/* ---------- 6 pricing ---------- */
+.s-price{text-align:center}
+.s-price h2{font-size:80px}
+.cards{display:grid;grid-template-columns:repeat(3,400px);gap:36px;justify-content:center;margin-top:54px;perspective:1400px}
+.card{position:relative;text-align:left;padding:38px 36px 34px;border-radius:6px;background:linear-gradient(160deg,rgba(90,20,36,.78),rgba(28,7,12,.9));
+  border:1px solid rgba(210,171,108,.28);backdrop-filter:blur(10px);transform-style:preserve-3d}
+.card.hot{background:linear-gradient(160deg,#f6ead4,#e7d2ad);color:#2a0d13;border-color:var(--gold-hi)}
+.card .badge{position:absolute;top:-14px;left:36px;font:700 11px/1 var(--sans);letter-spacing:.2em;text-transform:uppercase;background:var(--wine);color:var(--gold-hi);padding:9px 12px;border-radius:2px}
+.card h3{font:italic 600 38px/1 var(--serif)}
+.card .price{margin-top:22px;font:500 62px/1 var(--serif);letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.card .price small{font:600 18px/1 var(--sans);vertical-align:top;margin-right:6px;position:relative;top:10px}
+.card ul{list-style:none;margin-top:26px;border-top:1px solid currentColor;border-color:rgba(210,171,108,.3)}
+.card li{font-size:17px;padding:13px 0;border-bottom:1px solid rgba(210,171,108,.15);display:flex;gap:10px}
+.card li::before{content:"◆";color:var(--gold);font-size:10px;margin-top:5px}
+.card.hot li::before{color:var(--wine)}
+.s-price .fine{margin-top:40px;font-size:15px;color:var(--mute);letter-spacing:.02em}
+.s-price .fine b{color:var(--gold-hi);font-weight:600}
+
+/* ---------- 7 why ---------- */
+.s-why .panel{right:104px;top:84px;width:560px;height:315px}
+.s-why h2{max-width:760px}
+.pillars{position:absolute;left:104px;right:104px;top:470px;display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(210,171,108,.35)}
+.pillar{padding:30px 30px 0 0}
+.pillar svg{width:40px;height:40px;stroke:var(--gold);fill:none;stroke-width:1.5}
+.pillar h3{font:500 32px/1.1 var(--serif);margin-top:18px}
+.pillar p{font-size:17px;line-height:1.5;color:var(--mute);margin-top:10px;max-width:290px}
+.s-why .quip{position:absolute;left:104px;bottom:92px;font:italic 500 26px/1.35 var(--serif);color:var(--gold-hi);max-width:1000px}
+
+/* ---------- 8 close ---------- */
+.s-close{display:flex;flex-direction:column;justify-content:center;align-items:flex-end;text-align:right;padding-right:96px}
+.s-close::before{content:"";position:absolute;inset:-200px -400px -200px 45%;background:linear-gradient(90deg,transparent,rgba(13,6,8,.78) 45%);z-index:-1}
+.s-close h2{font-size:80px;max-width:760px}
+.s-close .sign{display:flex;align-items:center;gap:22px;margin-top:64px}
+.s-close .sign img{width:84px}
+.s-close .sign div{font:500 44px/1 var(--serif)}
+.s-close .sign small{display:block;font:500 15px/1.4 var(--sans);color:var(--mute);margin-top:8px;letter-spacing:.04em}
+.s-close .ty{margin-top:40px;font:italic 500 64px/1 var(--serif);color:var(--gold-hi)}
+
+@media (prefers-reduced-motion:reduce){#grain{animation:none}}
+</style>
+</head>
+<body>
+
+<div id="bg"></div>
+<canvas id="gl"></canvas>
+<div id="grain"></div>
+
+<main id="stage">
+
+  <!-- 1 · COVER -->
+  <section class="slide s-cover" data-bg="scene1" data-mode="full" data-loop="0,5.6" data-form="heart"
+    data-notes="Buka dengan tenang. 'Kami tidak menjanjikan cinta sejati. Kami membantu mengurangi kandidat yang tidak tepat.' Lalu perkenalkan nama perusahaan.">
+    <img class="mark" src="media/logo.svg" alt="">
+    <h1><span class="line"><span>JODOH <em>Inc.</em></span></span></h1>
+    <div class="acr"><b>J</b>asa <b>O</b>ptimalisasi <b>D</b>ating &amp; <b>O</b>rientasi <b>H</b>ubungan</div>
+    <div class="rule"></div>
+    <div class="tag">“Kami tidak menjanjikan cinta sejati.<br>Kami mengurangi kandidat yang salah.”</div>
+    <div class="team">
+      <div><b>12</b>Rachel Christie</div>
+      <div><b>13</b>Michaela</div>
+      <div><b>14</b>Kayla Fausta Natania Sada</div>
+      <div><b>15</b>Naisyirah Ramadhani Tuasikal</div>
+      <div><b>18</b>Rizal Fahmi</div>
+    </div>
+  </section>
+
+  <!-- 2 · HOOK -->
+  <section class="slide s-hook" data-bg="scene3" data-mode="blur" data-form="drift"
+    data-notes="Pernahkah merasa cari pasangan lebih rumit dari skripsi? Skripsi setidaknya jelas judulnya. Pasangan: cocok fisik, beda visi. Cocok visi, beda agama. Cocok semua, ternyata belum selesai dengan masa lalunya. Di situlah JODOH Inc. masuk.">
+    <div class="kicker">Selamat datang</div>
+    <h2><span class="line"><span>Cari pasangan itu</span></span><span class="line"><span>lebih rumit dari <em>skripsi.</em></span></span></h2>
+    <div class="panel"><video src="media/scene3.mp4" poster="media/scene3.jpg" muted playsinline loop preload="none"></video><span class="tag">Lobi JODOH Inc.</span></div>
+    <div class="vs">
+      <div class="k">Skripsi</div>
+      <div class="row"><span class="chip ok">Setidaknya judulnya jelas.</span></div>
+      <div class="k r2">Pasangan</div>
+      <div class="row r2">
+        <span class="chip x-it">Cocok fisik<i class="x"></i></span>
+        <span class="chip x-it">→ beda visi<i class="x"></i></span>
+        <span class="chip x-it">Cocok visi<i class="x"></i></span>
+        <span class="chip x-it">→ beda agama<i class="x"></i></span>
+        <span class="chip x-it">Cocok semua<i class="x"></i></span>
+        <span class="chip ok">→ belum move on.</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 · PROBLEM -->
+  <section class="slide s-prob" data-bg="scene2" data-mode="blur" data-form="vortex"
+    data-notes="Bertemu orang baru makin gampang, yang cocok tetap susah. Daftar kriteria makin panjang, kayak lowongan direksi. Tapi ditanya apa yang ditawarkan: 'aku orangnya memang begini.' Boleh standar tinggi, asal seimbang.">
+    <div class="kicker">Masalahnya</div>
+    <h2><span class="line"><span>Banyak pilihan,</span></span><span class="line"><span><em>sedikit kepastian.</em></span></span></h2>
+    <div class="panel"><video src="media/scene2.mp4" poster="media/scene2.jpg" muted playsinline loop preload="none"></video><span class="tag">Swipe ke-347</span></div>
+
+    <div class="job">
+      <div class="hd"><b>LOWONGAN · LEVEL DIREKSI</b><span>Dicari: Pasangan Hidup</span></div>
+      <ul>
+        <li><i>✓</i> Tinggi minimal 180 cm</li>
+        <li><i>✓</i> Mapan, tapi rendah hati</li>
+        <li><i>✓</i> Lucu, tapi serius</li>
+        <li><i>✓</i> Komunikatif 24/7</li>
+        <li><i>✓</i> Masa depan cerah</li>
+        <li><i>✓</i> Selalu ada saat dibutuhkan</li>
+      </ul>
+      <div class="offer"><small>YANG DITAWARKAN PELAMAR</small><q data-type="Aku orangnya memang begini."></q></div>
+      <div class="stamp">TIDAK SEIMBANG</div>
+    </div>
+
+    <ul class="side">
+      <li><span>01</span>Ekspektasi makin kompleks</li>
+      <li><span>02</span>Ketertarikan sesaat ≠ kecocokan</li>
+      <li><span>03</span>Waktu habis di hubungan yang tidak sejalan</li>
+    </ul>
+  </section>
+
+  <!-- 4 · SERVICES -->
+  <section class="slide s-svc" data-bg="scene4" data-mode="blur" data-form="trio"
+    data-notes="Tiga layanan. Kami tidak cuma tanya 'sukanya yang seperti apa', tapi 'kamu cari pasangan hidup atau teman isi waktu luang?' Kadang masalahnya bukan tidak ada yang cocok, tapi yang satu cari pasangan hidup, yang lain belum bisa memutuskan mau makan apa.">
+    <div class="kicker">Cara kerja</div>
+    <h2><span class="line"><span>Tiga langkah,</span></span><span class="line"><span>satu <em>arah yang jelas.</em></span></span></h2>
+    <div class="panel"><video src="media/scene4.mp4" poster="media/scene4.jpg" muted playsinline loop preload="none"></video><span class="tag">Sesi konsultasi</span></div>
+    <div class="steps">
+      <svg class="track" viewBox="0 0 1392 4" preserveAspectRatio="none"><line x1="0" y1="2" x2="1392" y2="2" stroke="#d2ab6c" stroke-opacity=".5" stroke-dasharray="4 8"/></svg>
+      <div class="step"><div class="n">01</div><h3>Love Profile Assessment</h3><p>Memetakan kepribadian, gaya komunikasi, dan tujuan hubungan. <em>Yang kamu butuhkan, bukan yang bagus di foto.</em></p></div>
+      <div class="step"><div class="n">02</div><h3>Matchmaking</h3><p>Kandidat terkurasi berdasarkan kecocokan yang relevan. <em>Bukan “sama-sama suka kopi”, lalu dibilang jodoh.</em></p></div>
+      <div class="step"><div class="n">03</div><h3>First Date Concierge</h3><p>Tempat, aktivitas, dan budget diatur untuk kedua pihak. <em>Kalau tidak cocok, setidaknya bukan salah tempatnya.</em></p></div>
+    </div>
+  </section>
+
+  <!-- 5 · MATCH -->
+  <section class="slide s-match" data-bg="scene5" data-mode="blur" data-form="pair"
+    data-notes="Contoh laporan kecocokan (profil fiktif). Kami ukur hal yang memengaruhi hubungan jangka panjang: nilai, tujuan, cara komunikasi. Perhatikan: selera kopi beda jauh, dan itu tidak apa-apa. Bobotnya nol.">
+    <div class="kicker">Laporan kecocokan · contoh</div>
+    <h2><span class="line"><span>Lebih dari</span></span><span class="line"><span><em>chemistry.</em></span></span></h2>
+    <div class="panel"><video src="media/scene5.mp4" poster="media/scene5.jpg" muted playsinline loop preload="none"></video><span class="tag">Kencan pertama</span></div>
+    <svg class="radar" viewBox="0 0 760 760"></svg>
+    <div class="legend"><span><i style="background:#f2dba6"></i>Nadia, 27 (klien)</span><span><i style="background:#c2475f"></i>Raka, 29 (kandidat)</span></div>
+    <div class="foot">*Selera kopi: bobot 0%.</div>
+  </section>
+
+  <!-- 6 · PRICING -->
+  <section class="slide s-price" data-bg="scene6" data-mode="blur" data-form="columns"
+    data-notes="Tiga paket. Pendapatan dari konsultasi, paket matchmaking, dan layanan tambahan perencanaan kencan. Harga transparan sejak awal. Satu hal yang perlu ditegaskan: harga tidak termasuk jaminan dapat pasangan. Kalau cinta bisa dipastikan lewat paket premium, antrean nikah sudah lebih panjang dari antrean bimbingan skripsi.">
+    <div class="kicker">Pilih paketmu</div>
+    <h2><span class="line"><span>Choose your <em>love plan.</em></span></span></h2>
+    <div class="cards">
+      <div class="card"><h3>Kenalan Dulu</h3><div class="price"><small>Rp</small><span data-count="99000">0</span></div>
+        <ul><li>Love Profile Assessment</li><li>Konsultasi awal 1 sesi</li><li>Peta prioritas: wajib vs bonus</li></ul></div>
+      <div class="card hot"><span class="badge">Paling realistis</span><h3>Cari yang Cocok</h3><div class="price"><small>Rp</small><span data-count="299000">0</span></div>
+        <ul><li>Semua di Kenalan Dulu</li><li>Hingga 3 kandidat terkurasi</li><li>Laporan kecocokan</li></ul></div>
+      <div class="card"><h3>Serius Nih?</h3><div class="price"><small>Rp</small><span data-count="599000">0</span></div>
+        <ul><li>Matchmaking personal</li><li>First Date Concierge</li><li>Evaluasi setelah kencan</li></ul></div>
+    </div>
+    <p class="fine">Harga simulasi. Belum termasuk biaya kencan, ongkos parkir, dan <b>jaminan perasaan.</b> Kami agensi jodoh, bukan pabrik perasaan.</p>
+  </section>
+
+  <!-- 7 · WHY -->
+  <section class="slide s-why" data-bg="scene7" data-mode="blur" data-form="ring"
+    data-notes="Keunggulan: personal, terarah, transparan. Hubungan itu pribadi, jadi data klien dikelola dengan persetujuan dan keamanan. Kami tidak menjanjikan setiap pertemuan berakhir romantis; keputusan tetap di tangan kedua orang.">
+    <div class="kicker">Kenapa JODOH Inc.</div>
+    <h2><span class="line"><span>Personal. Terarah.</span></span><span class="line"><span><em>Jujur soal hasil.</em></span></span></h2>
+    <div class="panel"><video src="media/scene7.mp4" poster="media/scene7.jpg" muted playsinline loop preload="none"></video><span class="tag">Makan malam ke-2</span></div>
+    <div class="pillars">
+      <div class="pillar"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="15"/><circle cx="20" cy="20" r="8"/><circle cx="20" cy="20" r="1.5"/></svg><h3>Preferensi jelas</h3><p>Kami pisahkan yang “wajib” dari yang “kalau ada, bonus”.</p></div>
+      <div class="pillar"><svg viewBox="0 0 40 40"><circle cx="14" cy="14" r="6"/><circle cx="27" cy="14" r="6"/><path d="M4 34c1-7 5-10 10-10s9 3 10 10M20 26c2-2 4-2 7-2 5 0 9 3 10 10"/></svg><h3>Proses personal</h3><p>Matchmaker manusia, bukan algoritma swipe tanpa akhir.</p></div>
+      <div class="pillar"><svg viewBox="0 0 40 40"><rect x="9" y="18" width="22" height="16" rx="2"/><path d="M14 18v-5a6 6 0 0 1 12 0v5"/><circle cx="20" cy="26" r="2"/></svg><h3>Privasi dijaga</h3><p>Data hanya dibagikan dengan persetujuan klien.</p></div>
+      <div class="pillar"><svg viewBox="0 0 40 40"><path d="M6 20h28M20 6v28"/><circle cx="20" cy="20" r="14"/></svg><h3>Tanpa janji palsu</h3><p>Kami perbesar peluang. Keputusan tetap milik kalian berdua.</p></div>
+    </div>
+    <p class="quip">Kalau cinta bisa dibeli dengan paket premium, antrean nikah sudah lebih panjang dari antrean bimbingan skripsi.</p>
+  </section>
+
+  <!-- 8 · CLOSE -->
+  <section class="slide s-close" data-bg="scene8" data-mode="full" data-loop="1.6,5.8" data-form="heartR"
+    data-notes="Kami tidak bisa menjamin Anda menemukan jodoh. Tapi kami bisa membantu Anda tidak menghabiskan tiga bulan untuk orang yang sejak awal tidak mencari hubungan serius. (jeda) JODOH Inc. — kami membantu Anda mencari pasangan, bukan menambah daftar mantan. Terima kasih.">
+    <div class="kicker">Penutup</div>
+    <h2><span class="line"><span>Kami tidak menjamin jodoh.</span></span><span class="line"><span>Kami menyelamatkan</span></span><span class="line"><span><em>tiga bulan hidupmu.</em></span></span></h2>
+    <div class="sign"><img src="media/logo.svg" alt=""><div>JODOH Inc.<small>Mencari pasangan, bukan menambah daftar mantan.</small></div></div>
+    <div class="ty">Terima kasih.</div>
+  </section>
+
+</main>
+
+<div id="hud"><div class="brand"><img src="media/logo.svg" alt="">JODOH INC.</div><div id="bar"><i></i></div><div id="count">01 / 08</div></div>
+<div id="notes"><b>CATATAN PEMBICARA</b><span></span></div>
+<div id="hint">← → navigasi · N catatan · F layar penuh</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script type="module">
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
+
+const slides=[...document.querySelectorAll(".slide")];
+const stage=document.getElementById("stage");
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ---------- stage scaling ---------- */
+function fit(){const s=Math.min(innerWidth/1600,innerHeight/900);stage.style.transform=`translate(-50%,-50%) scale(${s})`}
+addEventListener("resize",fit);fit();
+
+/* ---------- background layers ---------- */
+const bg=document.getElementById("bg");
+const layers=slides.map(s=>{
+  const d=document.createElement("div");d.className="layer "+s.dataset.mode;
+  const name=s.dataset.bg;
+  if(s.dataset.mode==="full"){
+    const v=document.createElement("video");Object.assign(v,{src:`media/${name}.mp4`,poster:`media/${name}.jpg`,muted:true,playsInline:true,preload:"auto"});
+    const [a,b]=s.dataset.loop.split(",").map(Number);
+    v.addEventListener("timeupdate",()=>{if(v.currentTime>=b)v.currentTime=a});
+    v.dataset.start=a;d.appendChild(v);
+  }else{const im=new Image();im.src=`media/${name}.jpg`;im.alt="";d.appendChild(im)}
+  bg.appendChild(d);return d;
+});
+
+/* ---------- radar chart (slide 5) ---------- */
+const radar=document.querySelector(".radar");
+const axes=["Nilai hidup","Tujuan hubungan","Gaya komunikasi","Gaya hidup","Pandangan finansial","Selera kopi"];
+const A=[.92,.88,.8,.72,.78,.95], B=[.86,.9,.74,.8,.7,.18];
+const C=380,R=215,NS="http://www.w3.org/2000/svg";
+const pt=(i,r)=>{const a=-Math.PI/2+i*Math.PI*2/axes.length;return[C+Math.cos(a)*r,C+Math.sin(a)*r]};
+const el=(t,at)=>{const e=document.createElementNS(NS,t);for(const k in at)e.setAttribute(k,at[k]);radar.appendChild(e);return e};
+[.25,.5,.75,1].forEach(f=>el("polygon",{points:axes.map((_,i)=>pt(i,R*f).join(",")).join(" "),fill:"none",stroke:"rgba(244,232,212,.14)"}));
+axes.forEach((n,i)=>{const[x,y]=pt(i,R);el("line",{x1:C,y1:C,x2:x,y2:y,stroke:"rgba(244,232,212,.14)"});
+  const[tx,ty]=pt(i,R+38);const t=el("text",{x:tx,y:ty+5,"text-anchor":Math.abs(tx-C)<10?"middle":tx>C?"start":"end"});t.textContent=n;
+  if(n==="Selera kopi")t.setAttribute("fill","#d2ab6c")});
+const polyA=el("polygon",{fill:"rgba(242,219,166,.16)",stroke:"#f2dba6","stroke-width":2.5});
+const polyB=el("polygon",{fill:"rgba(194,71,95,.18)",stroke:"#c2475f","stroke-width":2.5});
+const score=el("text",{x:C,y:C+30,"text-anchor":"middle",class:"score"});score.textContent="0%";
+const sub=el("text",{x:C,y:C+62,"text-anchor":"middle"});sub.textContent="kecocokan relevan";
+function drawRadar(k){polyA.setAttribute("points",A.map((v,i)=>pt(i,R*v*k).join(",")).join(" "));
+  polyB.setAttribute("points",B.map((v,i)=>pt(i,R*v*k).join(",")).join(" "))}
+drawRadar(0);
+
+/* ---------- per-slide entrance timelines ---------- */
+const E="expo.out";
+function base(s,tl){
+  tl.from(s.querySelectorAll(".kicker"),{opacity:0,x:-30,duration:.8,ease:E},0)
+    .from(s.querySelectorAll("h2 .line>span"),{yPercent:110,rotate:3,duration:1.1,stagger:.09,ease:E},.1)
+    .from(s.querySelectorAll(".panel"),{clipPath:"inset(0 0 100% 0)",scale:1.06,duration:1.4,ease:"expo.inOut"},.15);
+}
+const build={
+  0(s,tl){
+    tl.from(".s-cover .mark",{opacity:0,scale:.6,rotate:-20,duration:1.6,ease:"expo.out"},0)
+      .from(".s-cover h1 .line>span",{yPercent:110,duration:1.3,ease:E},.35)
+      .from(".s-cover .acr b",{opacity:0,y:-20,stagger:.08,duration:.6,ease:"back.out(3)"},.9)
+      .from(".s-cover .acr",{opacity:0,letterSpacing:"1em",duration:1.6,ease:E},.8)
+      .to(".s-cover .rule",{width:280,duration:1.2,ease:"expo.inOut"},1.2)
+      .from(".s-cover .tag",{opacity:0,y:20,filter:"blur(8px)",duration:1.2,ease:E},1.5)
+      .from(".team",{opacity:0,duration:.8},1.9)
+      .from(".team div",{opacity:0,y:18,stagger:.12,duration:.8,ease:E},2.0);
+  },
+  1(s,tl){base(s,tl);
+    tl.from(s.querySelector(".vs"),{opacity:0,y:30,duration:.8,ease:E},.6)
+      .from(s.querySelectorAll(".chip"),{opacity:0,y:16,scale:.9,stagger:.12,duration:.5,ease:"back.out(2)"},.8)
+      .to(s.querySelectorAll(".x-it .x"),{scaleX:1,stagger:.18,duration:.35,ease:"power2.in"},1.9)
+      .to(s.querySelectorAll(".x-it"),{opacity:.4,stagger:.18,duration:.35},2.0);
+  },
+  2(s,tl){base(s,tl);
+    const q=s.querySelector("q"),txt=q.dataset.type;q.textContent="";
+    tl.from(s.querySelector(".job"),{y:120,rotateX:25,opacity:0,duration:1.2,ease:E,transformPerspective:1200},.4)
+      .from(s.querySelectorAll(".job li"),{opacity:0,x:-18,stagger:.1,duration:.5,ease:E},.9)
+      .to({n:0},{n:txt.length,duration:1.4,ease:"none",onUpdate(){q.textContent=txt.slice(0,Math.round(this.targets()[0].n))}},1.9)
+      .fromTo(s.querySelector(".stamp"),{opacity:0,scale:2.4,rotate:-25},{opacity:.92,scale:1,rotate:-9,duration:.35,ease:"power4.in"},3.5)
+      .to(s.querySelector(".job"),{x:"+=6",yoyo:true,repeat:3,duration:.05},3.85)
+      .from(s.querySelectorAll(".side li"),{opacity:0,y:20,stagger:.12,duration:.7,ease:E},.9);
+  },
+  3(s,tl){base(s,tl);
+    tl.from(s.querySelector(".track line"),{attr:{x2:0},duration:1.6,ease:"expo.inOut"},.5)
+      .from(s.querySelectorAll(".step .n"),{scale:0,stagger:.25,duration:.7,ease:"back.out(2.5)"},.7)
+      .from(s.querySelectorAll(".step h3,.step p"),{opacity:0,y:24,stagger:.08,duration:.8,ease:E},.9);
+  },
+  4(s,tl){base(s,tl);
+    const k={v:0},sc={v:0};
+    tl.to(k,{v:1,duration:1.8,ease:"elastic.out(1,.6)",onUpdate:()=>drawRadar(k.v)},.5)
+      .from(radar.querySelectorAll("text:not(.score)"),{opacity:0,stagger:.05,duration:.5},.5)
+      .to(sc,{v:87,duration:1.8,ease:"power2.out",onUpdate:()=>score.textContent=Math.round(sc.v)+"%"},.7)
+      .from(s.querySelectorAll(".legend,.foot"),{opacity:0,y:12,duration:.8,stagger:.2},1.8);
+  },
+  5(s,tl){base(s,tl);
+    tl.from(s.querySelectorAll(".card"),{y:140,rotateY:-35,opacity:0,stagger:.14,duration:1.2,ease:E},.3);
+    s.querySelectorAll("[data-count]").forEach((n,i)=>{const o={v:0};
+      tl.to(o,{v:+n.dataset.count,duration:1.4,ease:"power3.out",onUpdate:()=>n.textContent=(Math.round(o.v/1000)*1000).toLocaleString("id-ID")},.6+i*.14)});
+    tl.from(s.querySelector(".fine"),{opacity:0,duration:1},1.6);
+  },
+  6(s,tl){base(s,tl);
+    tl.from(s.querySelector(".pillars"),{opacity:0,duration:.6},.4)
+      .from(s.querySelectorAll(".pillar"),{opacity:0,y:40,stagger:.12,duration:.9,ease:E},.5)
+      .from(s.querySelectorAll(".pillar svg"),{scale:.4,rotate:-90,opacity:0,stagger:.12,duration:.8,ease:"back.out(2)"},.6)
+      .from(s.querySelector(".quip"),{opacity:0,y:16,filter:"blur(6px)",duration:1.1,ease:E},1.4);
+  },
+  7(s,tl){base(s,tl);
+    tl.from(s.querySelector(".sign"),{opacity:0,x:-40,duration:1.2,ease:E},1.3)
+      .from(s.querySelector(".ty"),{opacity:0,y:30,duration:1.4,ease:E},2.2);
+  }
+};
+
+/* card tilt */
+document.querySelectorAll(".card").forEach(c=>{
+  c.addEventListener("pointermove",e=>{const r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width-.5,y=(e.clientY-r.top)/r.height-.5;
+    c.style.transition="transform .2s ease-out";c.style.transform=`rotateY(${x*14}deg) rotateX(${-y*14}deg) translateZ(20px)`});
+  c.addEventListener("pointerleave",()=>c.style.transform="");
+});
+
+/* ---------- navigation ---------- */
+let cur=-1,tl=null;
+const bar=document.querySelector("#bar i"),count=document.getElementById("count"),notes=document.getElementById("notes");
+function go(n){
+  n=Math.max(0,Math.min(slides.length-1,n));if(n===cur)return;
+  const prev=slides[cur],dir=n>cur?1:-1;
+  if(prev){
+    gsap.to(prev,{opacity:0,y:-30*dir,duration:.5,ease:"power2.in",onComplete:()=>{prev.classList.remove("on");gsap.set(prev,{clearProps:"opacity,y"})}});
+    prev.querySelectorAll("video").forEach(v=>v.pause());
+    const bv=layers[cur].querySelector("video");if(bv)setTimeout(()=>bv.pause(),1200);
+    layers[cur].classList.remove("on");
+  }
+  cur=n;const s=slides[n];
+  tl&&tl.progress(1).kill();
+  tl=gsap.timeline({delay:prev?.45:.2,onStart:()=>s.classList.add("on")});
+  if(!reduce)build[n](s,tl);else tl.set(s,{});
+  layers[n].classList.add("on");
+  const bv=layers[n].querySelector("video");if(bv){bv.currentTime=+bv.dataset.start;bv.play().catch(()=>{})}
+  s.querySelectorAll("video").forEach(v=>{v.preload="auto";v.currentTime=0;v.play().catch(()=>{})});
+  const nx=slides[n+1];nx&&nx.querySelectorAll("video").forEach(v=>v.preload="auto");
+  bar.style.width=(n/(slides.length-1)*100)+"%";
+  count.textContent=String(n+1).padStart(2,"0")+" / "+String(slides.length).padStart(2,"0");
+  notes.querySelector("span").textContent=s.dataset.notes;
+  setForm(s.dataset.form);
+  history.replaceState(null,"","#"+(n+1));
+}
+addEventListener("keydown",e=>{
+  if(["ArrowRight","PageDown"," ","Enter"].includes(e.key)){e.preventDefault();go(cur+1)}
+  else if(["ArrowLeft","PageUp","Backspace"].includes(e.key)){e.preventDefault();go(cur-1)}
+  else if(e.key==="Home")go(0);else if(e.key==="End")go(slides.length-1);
+  else if(e.key.toLowerCase()==="n")notes.classList.toggle("on");
+  else if(e.key.toLowerCase()==="f"){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+});
+addEventListener("click",e=>{if(e.target.closest(".card"))return;go(e.clientX<innerWidth*.3?cur-1:cur+1)});
+let tx=null;addEventListener("touchstart",e=>tx=e.touches[0].clientX,{passive:true});
+addEventListener("touchend",e=>{if(tx==null)return;const d=e.changedTouches[0].clientX-tx;if(Math.abs(d)>50)go(cur+(d<0?1:-1));tx=null});
+setTimeout(()=>document.getElementById("hint").style.opacity=0,6000);
+
+/* ---------- three.js particle field ---------- */
+const N=innerWidth<800?1600:3200;
+const renderer=new THREE.WebGLRenderer({canvas:document.getElementById("gl"),alpha:true,antialias:false});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(45,1,1,500);camera.position.z=100;
+const geo=new THREE.BufferGeometry(),pos=new Float32Array(N*3),tgt=new Float32Array(N*3),seed=new Float32Array(N);
+for(let i=0;i<N;i++){seed[i]=Math.random();pos[i*3]=(Math.random()-.5)*200;pos[i*3+1]=(Math.random()-.5)*120;pos[i*3+2]=(Math.random()-.5)*80}
+geo.setAttribute("position",new THREE.BufferAttribute(pos,3));geo.setAttribute("seed",new THREE.BufferAttribute(seed,1));
+const mat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
+  uniforms:{t:{value:0},px:{value:renderer.getPixelRatio()},glow:{value:1}},
+  vertexShader:`attribute float seed;uniform float t,px;varying float vS;varying float vA;
+    void main(){vec3 p=position;p.x+=sin(t*.6+seed*40.)*.35;p.y+=cos(t*.5+seed*30.)*.35;
+      vec4 mv=modelViewMatrix*vec4(p,1.);gl_Position=projectionMatrix*mv;
+      float tw=.55+.45*sin(t*2.+seed*60.);vA=tw;vS=seed;
+      gl_PointSize=(1.2+seed*2.6)*px*(120./-mv.z);}`,
+  fragmentShader:`varying float vS;varying float vA;uniform float glow;
+    void main(){float d=length(gl_PointCoord-.5);if(d>.5)discard;float a=pow(1.-d*2.,1.8);
+      vec3 c=mix(vec3(.82,.62,.36),vec3(1.,.9,.72),vS);gl_FragColor=vec4(c,a*vA*.85*glow);}`});
+const pts=new THREE.Points(geo,mat);scene.add(pts);
+
+let W=0,H=0;
+function view(){const h=2*Math.tan(THREE.MathUtils.degToRad(22.5))*100;H=h/2;W=h*camera.aspect/2}
+const rnd=(a=1)=>(Math.random()-.5)*2*a;
+const forms={
+  heart(ox=0,s=1){const k=Math.min(W,H)*.052*s;
+    for(let i=0;i<N;i++){const t=Math.random()*Math.PI*2,r=i%3?1:Math.sqrt(Math.random());
+      const x=16*Math.pow(Math.sin(t),3),y=13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t);
+      tgt[i*3]=ox*W+x*k*r+rnd(.6);tgt[i*3+1]=y*k*r+2+rnd(.6);tgt[i*3+2]=rnd(6)*(1-r*.6)}},
+  heartR(){forms.heart(-.12,1.25)},
+  drift(){for(let i=0;i<N;i++){const x=rnd(W*1.1),z=rnd(30);tgt[i*3]=x;tgt[i*3+1]=-H*.62+Math.sin(x*.08)*4+Math.cos(z*.1)*3+rnd(1.5);tgt[i*3+2]=z}},
+  vortex(){for(let i=0;i<N;i++){const a=seed[i]*Math.PI*22,r=4+seed[i]*W*.9;
+    tgt[i*3]=Math.cos(a)*r*.9+W*.1;tgt[i*3+1]=Math.sin(a)*r*.45;tgt[i*3+2]=rnd(14)}},
+  trio(){const cx=[-.86,-.52,-.18];for(let i=0;i<N;i++){const c=i%3,u=Math.random()*Math.PI*2,v=Math.acos(rnd(1)),r=H*.09*(i%5?1:Math.random());
+    tgt[i*3]=cx[c]*W+Math.sin(v)*Math.cos(u)*r;tgt[i*3+1]=-H*.02+Math.sin(v)*Math.sin(u)*r;tgt[i*3+2]=Math.cos(v)*r}},
+  pair(){for(let i=0;i<N;i++){const c=i%2,u=Math.random()*Math.PI*2,v=Math.acos(rnd(1)),r=H*.16;
+    tgt[i*3]=(c?.1:-.1)*W+W*.4+Math.sin(v)*Math.cos(u)*r;tgt[i*3+1]=Math.sin(v)*Math.sin(u)*r;tgt[i*3+2]=Math.cos(v)*r}},
+  columns(){for(let i=0;i<N;i++){const c=i%3,h=Math.pow(Math.random(),2);
+    tgt[i*3]=(c-1)*W*.52+rnd(W*.2);tgt[i*3+1]=-H*1.0+h*H*.5;tgt[i*3+2]=rnd(10)}},
+  ring(){for(let i=0;i<N;i++){const a=Math.random()*Math.PI*2,r=H*.95+rnd(3);
+    tgt[i*3]=Math.cos(a)*r*1.7;tgt[i*3+1]=Math.sin(a)*r*.32-H*.05;tgt[i*3+2]=Math.sin(a)*20}}
+};
+let form="heart",glowT=1,spin=0;
+function setForm(f){form=f;forms[f]();glowT=(f==="heart"||f==="heartR")?1:.55}
+function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();view();forms[form]()}
+addEventListener("resize",resize);resize();
+
+let mx=0,my=0;addEventListener("pointermove",e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
+const clock=new THREE.Clock();
+(function loop(){
+  const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;mat.uniforms.t.value=t;
+  mat.uniforms.glow.value+=(glowT-mat.uniforms.glow.value)*.03;
+  const e=reduce?1:1-Math.pow(.025,dt);
+  for(let i=0;i<N*3;i+=3){const k=e*(.55+seed[i/3]*.45);pos[i]+=(tgt[i]-pos[i])*k;pos[i+1]+=(tgt[i+1]-pos[i+1])*k;pos[i+2]+=(tgt[i+2]-pos[i+2])*k}
+  geo.attributes.position.needsUpdate=true;
+  spin=form.startsWith("heart")?Math.sin(t*.4)*.25:form==="vortex"?0:0;
+  pts.rotation.y+=((spin+mx*.25)-pts.rotation.y)*.05;pts.rotation.x+=((my*.15)-pts.rotation.x)*.05;
+  if(form==="vortex")pts.rotation.z+=dt*.05;else pts.rotation.z*=.95;
+  renderer.render(scene,camera);requestAnimationFrame(loop);
+})();
+
+go(Math.max(0,(parseInt(location.hash.slice(1))||1)-1));
+</script>
+</body>
+</html>
