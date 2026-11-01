@@ -1,0 +1,686 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>JODOH Inc.</title>
+<meta name="description" content="Match people, not just profiles.">
+<meta name="theme-color" content="#16060a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="JODOH">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#16060a;--deep:#220a10;--card:#2c0e16;--line:rgba(244,232,212,.12);
+  --maroon:#5a1424;--wine:#8a2338;--rose:#c2475f;
+  --cream:#f4e8d4;--mute:#bba892;--gold:#d2ab6c;--gold-hi:#f2dba6;
+  --serif:"Cormorant Garamond",Georgia,serif;--sans:"Manrope",-apple-system,system-ui,sans-serif;
+  --st:env(safe-area-inset-top);--sb:env(safe-area-inset-bottom);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--ink);color:var(--cream);font-family:var(--sans);overscroll-behavior:none}
+body{-webkit-font-smoothing:antialiased;overflow:hidden;-webkit-user-select:none;user-select:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+.serif{font-family:var(--serif)}
+em{font-style:italic;color:var(--gold-hi)}
+
+#app{position:fixed;inset:0;display:flex;flex-direction:column;
+  background:radial-gradient(120% 60% at 50% -10%,#4a1020 0%,transparent 60%),var(--ink)}
+.screen{position:absolute;inset:0;bottom:calc(64px + var(--sb));overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:calc(var(--st) + 18px) 20px 28px;opacity:0;pointer-events:none;transform:translateY(12px);transition:opacity .35s,transform .45s cubic-bezier(.2,.8,.2,1)}
+.screen.on{opacity:1;pointer-events:auto;transform:none}
+.screen.full{bottom:0}
+body.notab #tabs{transform:translateY(110%)}
+
+/* tab bar */
+#tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;height:calc(64px + var(--sb));padding-bottom:var(--sb);display:grid;grid-template-columns:repeat(5,1fr);
+  background:rgba(22,6,10,.86);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line);transition:transform .35s}
+#tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--mute);position:relative}
+#tabs svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+#tabs button.on{color:var(--gold-hi)}
+#tabs .dot{position:absolute;top:8px;left:calc(50% + 8px);min-width:16px;height:16px;border-radius:8px;background:var(--rose);color:#fff;font-size:10px;line-height:16px;padding:0 4px;display:none}
+
+/* common */
+.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:700;font-size:13px;letter-spacing:.2em}
+.brand img{width:26px}
+.kick{font-size:11px;font-weight:700;letter-spacing:.24em;text-transform:uppercase;color:var(--gold)}
+h1{font:500 42px/1.02 var(--serif);letter-spacing:-.01em;margin-top:10px}
+h2{font:500 30px/1.08 var(--serif);margin-top:8px}
+p.sub{color:var(--mute);font-size:15px;line-height:1.5;margin-top:10px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:54px;border-radius:16px;font-weight:700;font-size:16px;
+  background:linear-gradient(135deg,var(--gold-hi),var(--gold));color:#2a0d13;box-shadow:0 10px 30px -10px rgba(210,171,108,.6);transition:transform .15s}
+.btn:active{transform:scale(.97)}
+.btn.ghost{background:transparent;color:var(--cream);border:1px solid var(--line);box-shadow:none}
+.btn.sm{height:44px;font-size:14px;border-radius:12px}
+.chip{display:inline-flex;align-items:center;padding:7px 12px;border-radius:20px;font-size:13px;font-weight:600;background:rgba(244,232,212,.08);border:1px solid var(--line)}
+.panel{background:linear-gradient(160deg,rgba(90,20,36,.55),rgba(34,10,16,.85));border:1px solid rgba(210,171,108,.2);border-radius:20px;padding:18px}
+.row{display:flex;gap:10px;align-items:center}
+.sp{height:16px}
+.toast{position:fixed;left:50%;top:calc(var(--st) + 14px);transform:translate(-50%,-140%);z-index:50;background:rgba(244,232,212,.96);color:#2a0d13;
+  padding:12px 16px;border-radius:14px;font-weight:600;font-size:14px;max-width:88vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.4);transition:transform .45s cubic-bezier(.2,.9,.2,1.2)}
+.toast.on{transform:translate(-50%,0)}
+
+/* home */
+.hero{position:relative;border-radius:24px;overflow:hidden;height:300px;margin-top:4px}
+.hero .stack{position:absolute;inset:0}
+.hero .stack img{position:absolute;width:44%;aspect-ratio:3/4;object-fit:cover;border-radius:14px;box-shadow:0 18px 40px rgba(0,0,0,.6);border:2px solid rgba(244,232,212,.9)}
+.hero .stack img:nth-child(1){left:6%;top:30px;transform:rotate(-9deg)}
+.hero .stack img:nth-child(2){right:6%;top:40px;transform:rotate(8deg)}
+.hero .heart{position:absolute;left:50%;top:118px;width:76px;height:76px;margin-left:-38px;border-radius:50%;background:var(--ink);display:grid;place-items:center;
+  border:1px solid var(--gold);box-shadow:0 0 0 8px rgba(22,6,10,.6),0 0 40px rgba(210,171,108,.5);animation:pulse 2.4s ease-in-out infinite}
+.hero .heart img{width:46px}
+@keyframes pulse{50%{transform:scale(1.08)}}
+.hero .pct{position:absolute;left:0;right:0;bottom:18px;text-align:center;font:italic 600 22px/1 var(--serif);color:var(--gold-hi)}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.tile{text-align:left;padding:16px;border-radius:18px;background:rgba(244,232,212,.05);border:1px solid var(--line);min-height:112px;display:flex;flex-direction:column;justify-content:space-between}
+.tile b{font:500 22px/1.05 var(--serif)}
+.tile small{color:var(--mute);font-size:12.5px;line-height:1.35}
+.tile .ic{font-size:22px}
+.mycard{display:flex;gap:14px;align-items:center}
+.mycard .badge{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;background:linear-gradient(135deg,var(--gold-hi),var(--gold));color:#2a0d13;font:italic 600 30px/1 var(--serif);flex:none}
+
+/* quiz */
+.qbar{height:3px;background:var(--line);border-radius:3px;overflow:hidden;margin:6px 0 26px}
+.qbar i{display:block;height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-hi));transition:width .4s}
+.opts{display:flex;flex-direction:column;gap:10px;margin-top:24px}
+.opt{text-align:left;padding:17px 18px;border-radius:16px;background:rgba(244,232,212,.05);border:1px solid var(--line);font-size:16px;font-weight:600;transition:all .2s}
+.opt:active{transform:scale(.98)}
+.opt.sel{background:rgba(210,171,108,.18);border-color:var(--gold);color:var(--gold-hi)}
+.multi{display:flex;flex-wrap:wrap;gap:9px;margin-top:22px}
+.multi .opt{padding:12px 15px;font-size:14.5px;border-radius:30px}
+.qnav{position:sticky;bottom:0;padding-top:20px;background:linear-gradient(transparent,var(--ink) 30%)}
+.qanim{animation:qin .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes qin{from{opacity:0;transform:translateX(30px)}}
+
+/* result */
+.res-hero{text-align:center;padding:10px 0 6px}
+.res-hero .seal{width:120px;height:120px;margin:10px auto 0;border-radius:50%;display:grid;place-items:center;border:1px solid var(--gold);
+  background:radial-gradient(circle,rgba(210,171,108,.25),transparent 70%);animation:spin 18s linear infinite}
+.res-hero .seal img{width:64px;animation:spin 18s linear infinite reverse}
+@keyframes spin{to{transform:rotate(360deg)}}
+.bars{display:flex;flex-direction:column;gap:12px;margin-top:6px}
+.bar label{display:flex;justify-content:space-between;font-size:12.5px;color:var(--mute);margin-bottom:6px}
+.bar .t{height:6px;border-radius:6px;background:var(--line);overflow:hidden}
+.bar .t i{display:block;height:100%;width:0;border-radius:6px;background:linear-gradient(90deg,var(--wine),var(--gold-hi));transition:width 1.1s cubic-bezier(.2,.8,.2,1)}
+.meter{display:flex;align-items:center;gap:14px}
+.meter .big{font:500 46px/1 var(--serif);color:var(--gold-hi);font-variant-numeric:tabular-nums}
+.verdict{font:italic 500 21px/1.3 var(--serif);margin-top:10px}
+
+/* swipe */
+#swipe{display:flex;flex-direction:column;padding-bottom:16px}
+.deck{position:relative;flex:1;min-height:360px;margin:4px 0 14px}
+.cand{position:absolute;inset:0;border-radius:24px;overflow:hidden;background:#000;box-shadow:0 24px 50px -16px rgba(0,0,0,.8);touch-action:none;will-change:transform}
+.cand img{width:100%;height:100%;object-fit:cover;pointer-events:none;display:block}
+.cand .shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 45%,rgba(16,4,7,.95) 100%)}
+.cand .info{position:absolute;left:18px;right:18px;bottom:16px}
+.cand .nm{font:500 34px/1 var(--serif)}
+.cand .nm span{font-family:var(--sans);font-size:20px;font-weight:500;color:var(--mute);margin-left:6px}
+.cand .job{font-size:14px;color:var(--mute);margin-top:6px}
+.cand .bio{font:italic 500 17px/1.3 var(--serif);margin-top:10px;color:var(--cream)}
+.cand .score{position:absolute;top:14px;right:14px;width:62px;height:62px}
+.cand .score b{position:absolute;inset:0;display:grid;place-items:center;font-weight:800;font-size:15px;color:#fff}
+.cand .fic{position:absolute;top:16px;left:16px;font-size:10px;font-weight:700;letter-spacing:.16em;background:rgba(0,0,0,.45);padding:6px 9px;border-radius:8px;backdrop-filter:blur(6px)}
+.stampx{position:absolute;top:40px;font:800 30px/1 var(--sans);letter-spacing:.08em;padding:6px 12px;border:4px solid;border-radius:10px;opacity:0}
+.stampx.yes{left:22px;color:#7ee0a1;transform:rotate(-14deg)}
+.stampx.no{right:22px;color:#ff6f86;transform:rotate(14deg)}
+.stampx.sup{left:50%;top:auto;bottom:180px;transform:translateX(-50%) rotate(-6deg);color:var(--gold-hi)}
+.acts{display:flex;justify-content:center;align-items:center;gap:18px}
+.act{width:62px;height:62px;border-radius:50%;display:grid;place-items:center;background:rgba(244,232,212,.07);border:1px solid var(--line);font-size:26px;transition:transform .15s}
+.act:active{transform:scale(.88)}
+.act.big{width:72px;height:72px;background:linear-gradient(135deg,var(--gold-hi),var(--gold));color:#2a0d13;border:0}
+.act.s{width:50px;height:50px;font-size:20px}
+.detail{margin-top:12px;display:none}
+.cand.open .detail{display:block}
+.cand.open .shade{background:linear-gradient(180deg,transparent 0%,rgba(16,4,7,.97) 38%)}
+.detail .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.detail p{font-size:13.5px;line-height:1.45;color:var(--mute);margin-top:10px}
+.detail p b{color:var(--cream)}
+.empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;gap:12px;border:1px dashed var(--line);border-radius:24px}
+
+/* match overlay */
+#match{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 26px calc(var(--sb) + 30px);
+  background:radial-gradient(circle at 50% 40%,rgba(138,35,56,.95),rgba(16,4,7,.98) 70%);opacity:0;pointer-events:none;transition:opacity .4s}
+#match.on{opacity:1;pointer-events:auto}
+#match .pair{display:flex;align-items:center;margin:26px 0}
+#match .pair>*{width:120px;height:160px;border-radius:18px;object-fit:cover;border:3px solid var(--cream);box-shadow:0 20px 40px rgba(0,0,0,.5)}
+#match .pair .me{display:grid;place-items:center;background:linear-gradient(135deg,var(--gold-hi),var(--gold));color:#2a0d13;font:italic 600 54px/1 var(--serif);transform:rotate(-8deg) translateX(14px)}
+#match .pair img{transform:rotate(8deg) translateX(-14px)}
+#match h1{font-size:50px;text-align:center}
+#match .sub{text-align:center;max-width:320px}
+#match .btns{width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px;margin-top:28px}
+#confetti{position:fixed;inset:0;z-index:41;pointer-events:none}
+
+/* matches + date */
+.mlist{display:flex;flex-direction:column;gap:10px;margin-top:18px}
+.mitem{display:flex;gap:14px;align-items:center;padding:10px;border-radius:18px;background:rgba(244,232,212,.05);border:1px solid var(--line);text-align:left;width:100%}
+.mitem img{width:64px;height:84px;border-radius:12px;object-fit:cover}
+.mitem b{font:500 24px/1 var(--serif)}
+.mitem small{display:block;color:var(--mute);font-size:13px;margin-top:4px}
+.mitem .pc{margin-left:auto;font-weight:800;color:var(--gold-hi);font-size:15px;padding-right:6px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:4px;border-radius:14px;background:rgba(244,232,212,.06);margin-top:12px}
+.seg button{height:40px;border-radius:10px;font-size:13.5px;font-weight:700;color:var(--mute)}
+.seg button.on{background:var(--cream);color:#2a0d13}
+.plan{margin-top:16px;display:flex;flex-direction:column}
+.pstep{display:grid;grid-template-columns:44px 1fr;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}
+.pstep .t{font:italic 600 18px/1 var(--serif);color:var(--gold)}
+.pstep b{display:block;font-size:15.5px}
+.pstep small{display:block;color:var(--mute);font-size:13.5px;line-height:1.45;margin-top:4px}
+.back{display:inline-flex;align-items:center;gap:6px;color:var(--mute);font-weight:600;font-size:14px;padding:6px 0}
+
+/* plans */
+.pcard{position:relative;padding:20px;border-radius:22px;margin-top:14px;background:linear-gradient(160deg,rgba(90,20,36,.7),rgba(34,10,16,.95));border:1px solid rgba(210,171,108,.25)}
+.pcard.hot{background:linear-gradient(160deg,#f6ead4,#e5cfa8);color:#2a0d13;border-color:var(--gold-hi)}
+.pcard.rec{outline:2px solid var(--gold-hi);outline-offset:3px}
+.pcard h3{font:italic 600 28px/1 var(--serif)}
+.pcard .pr{font:500 40px/1 var(--serif);margin-top:12px}
+.pcard .pr small{font:700 14px/1 var(--sans);margin-right:4px;vertical-align:top}
+.pcard ul{list-style:none;margin:14px 0 16px}
+.pcard li{font-size:14px;padding:6px 0;display:flex;gap:8px}
+.pcard li::before{content:"◆";font-size:9px;margin-top:5px;color:var(--gold)}
+.pcard.hot li::before{color:var(--wine)}
+.pcard .tag{position:absolute;top:-10px;right:18px;font-size:10px;font-weight:800;letter-spacing:.14em;background:var(--wine);color:var(--gold-hi);padding:6px 9px;border-radius:6px}
+.pcard.hot .btn{background:#2a0d13;color:var(--gold-hi)}
+
+/* presenter */
+.timer{font:500 76px/1 var(--serif);text-align:center;font-variant-numeric:tabular-nums;margin-top:6px;transition:color .4s}
+.timer.warn{color:var(--gold-hi)}.timer.over{color:#ff7d92}
+.tline{height:4px;border-radius:4px;background:var(--line);margin:12px 0 4px;position:relative;overflow:hidden}
+.tline i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,var(--gold),var(--rose))}
+.tlabels{position:relative;height:14px;font-size:11px;color:var(--mute)}.tlabels span{position:absolute;transform:translateX(-50%)}.tlabels span:first-child{transform:none}.tlabels span:last-child{transform:translateX(-100%)}
+.note{margin-top:16px;padding:18px;border-radius:20px;background:rgba(244,232,212,.06);border:1px solid var(--line);min-height:190px}
+.note .s{display:flex;justify-content:space-between;align-items:baseline}
+.note .s b{font:500 26px/1.05 var(--serif)}
+.note .s span{color:var(--gold);font-weight:700;font-size:13px}
+.note p{font-size:17px;line-height:1.55;margin-top:10px}
+.team{margin-top:14px;display:grid;gap:6px}
+.team div{display:flex;gap:12px;align-items:baseline;font-size:14.5px}
+.team b{font:italic 600 22px/1 var(--serif);color:var(--gold-hi);width:28px}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME -->
+  <section class="screen" id="home">
+    <div class="top"><div class="brand"><img src="../media/logo.svg" alt="">JODOH INC.</div><button class="chip" data-go="presenter">Presenter</button></div>
+    <div class="kick" id="greet">Selamat datang</div>
+    <h1>Match people,<br><em>not just profiles.</em></h1>
+    <div class="hero"><div class="stack"><img src="img/w4.jpg" alt=""><img src="img/m6.jpg" alt=""></div>
+      <div class="heart"><img src="../media/logo.svg" alt=""></div><div class="pct" id="heroPct">kecocokan relevan, bukan cocoklogi</div></div>
+    <div id="homeMain"></div>
+    <div class="tiles">
+      <button class="tile" data-go="swipe"><span class="ic">♥</span><div><b>Kandidat</b><br><small>14 profil terkurasi. Geser, atau pikirkan baik-baik.</small></div></button>
+      <button class="tile" data-go="matches"><span class="ic">✦</span><div><b>First Date</b><br><small>Rencana kencan pertama, lengkap dengan Plan B.</small></div></button>
+      <button class="tile" data-go="standar"><span class="ic">⚖</span><div><b>Cek Standar</b><br><small>Yang kamu minta vs yang kamu tawarkan.</small></div></button>
+      <button class="tile" data-go="plans"><span class="ic">◆</span><div><b>Paket</b><br><small>Mulai Rp99.000. Perasaan tidak termasuk.</small></div></button>
+    </div>
+    <p class="sub" style="font-size:12px;margin-top:22px;text-align:center">Semua kandidat adalah profil fiktif untuk demo presentasi.<br>Data kamu hanya disimpan di HP ini.</p>
+  </section>
+
+  <!-- QUIZ -->
+  <section class="screen full" id="quiz">
+    <div class="top"><button class="back" id="qBack">‹ Kembali</button><span class="kick" id="qNum"></span></div>
+    <div class="qbar"><i id="qBar"></i></div>
+    <div id="qBody"></div>
+  </section>
+
+  <!-- RESULT -->
+  <section class="screen" id="result"></section>
+
+  <!-- STANDAR -->
+  <section class="screen" id="standar"></section>
+
+  <!-- SWIPE -->
+  <section class="screen" id="swipe">
+    <div class="top"><div><div class="kick">Kandidat hari ini</div><h2 style="margin-top:4px" id="swipeTitle">Kepala dingin, ya.</h2></div><button class="chip" id="filterBtn">Semua</button></div>
+    <div class="deck" id="deck"></div>
+    <div class="acts">
+      <button class="act s" id="undoBtn" aria-label="Batal">↺</button>
+      <button class="act" id="nopeBtn" aria-label="Lewati">✕</button>
+      <button class="act big" id="likeBtn" aria-label="Suka">♥</button>
+      <button class="act" id="supBtn" aria-label="Serius">★</button>
+      <button class="act s" id="infoBtn" aria-label="Detail">i</button>
+    </div>
+  </section>
+
+  <!-- MATCHES -->
+  <section class="screen" id="matches"></section>
+
+  <!-- DATE PLAN -->
+  <section class="screen" id="date"></section>
+
+  <!-- PLANS -->
+  <section class="screen" id="plans"></section>
+
+  <!-- PRESENTER -->
+  <section class="screen" id="presenter"></section>
+</div>
+
+<nav id="tabs">
+  <button data-go="home"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Beranda</button>
+  <button data-go="swipe"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="3"/><path d="M12 15.5s-3.5-2-3.5-4.3A1.9 1.9 0 0 1 12 10a1.9 1.9 0 0 1 3.5 1.2c0 2.3-3.5 4.3-3.5 4.3z"/></svg>Kandidat</button>
+  <button data-go="matches"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Match<span class="dot" id="mDot"></span></button>
+  <button data-go="plans"><svg viewBox="0 0 24 24"><path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18M9 3l3 18 3-18"/></svg>Paket</button>
+  <button data-go="presenter"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l3 2M9 2h6"/></svg>Presenter</button>
+</nav>
+
+<div id="match"></div>
+<canvas id="confetti"></canvas>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= data ================= */
+const DIMS={tujuan:"Tujuan hubungan",kom:"Gaya komunikasi",nilai:"Prioritas hidup",gaya:"Gaya hidup",fin:"Pandangan finansial"};
+const W={tujuan:.32,kom:.24,nilai:.2,gaya:.14,fin:.1};
+
+const C=[
+ {id:"w2",g:"w",n:"Sekar",a:26,job:"Arsitek lanskap · Bandung",bio:"Pernah merawat 14 kaktus. 13 selamat.",d:{tujuan:.8,gaya:.35,kom:.8,fin:.3,nilai:.7},tags:["Tanaman","Pasar pagi","Puzzle 1000 keping"],must:"Sabar dan tidak menghilang tanpa kabar.",bonus:"Bisa bedakan monstera dan philodendron.",kopi:"teh",topics:["tanaman yang paling susah dirawat","kota yang paling hijau menurutnya"]},
+ {id:"w3",g:"w",n:"Alya",a:25,job:"UX researcher · Jakarta",bio:"Akan bertanya “kenapa” lima kali. Termasuk saat kamu telat.",d:{tujuan:.6,gaya:.6,kom:.95,fin:.45,nilai:.5},tags:["Museum","Board game","Podcast"],must:"Bisa diajak ngobrol, bukan cuma dibalas “wkwk”.",bonus:"Punya opini soal font.",kopi:"susu",topics:["aplikasi yang paling menyebalkan desainnya","board game favorit"]},
+ {id:"w4",g:"w",n:"Nadine",a:27,job:"Dokter gigi · Surabaya",bio:"Senyum itu pekerjaan saya. Dan hobi.",d:{tujuan:.9,gaya:.4,kom:.75,fin:.25,nilai:.8},tags:["Pilates","Masak","Kuliner pagi"],must:"Serius dan sudah selesai dengan masa lalu.",bonus:"Rajin sikat gigi. Saya akan tahu.",kopi:"hitam",topics:["sarapan terbaik di kotanya","resep yang selalu gagal"]},
+ {id:"w5",g:"w",n:"Dinda",a:24,job:"Analis data · Yogyakarta",bio:"Pakai spreadsheet untuk semuanya. Termasuk perasaan.",d:{tujuan:.5,gaya:.3,kom:.6,fin:.2,nilai:.3},tags:["Excel","Kucing","Film festival"],must:"Jujur, walaupun datanya jelek.",bonus:"Tahu bedanya rata-rata dan median.",kopi:"none",topics:["data paling aneh yang pernah ia temukan","film yang bikin nangis"]},
+ {id:"w6",g:"w",n:"Maya",a:28,job:"Konsultan HR · Jakarta",bio:"Saya bisa membedakan CV jujur dan CV dibesar-besarkan. Bio juga.",d:{tujuan:.85,gaya:.7,kom:.9,fin:.5,nilai:.6},tags:["Lari pagi","Travel","Karaoke"],must:"Konsisten. Antara omongan dan kelakuan.",bonus:"Hafal lirik lagu 2000-an.",kopi:"susu",topics:["pertanyaan interview favoritnya","kota yang ingin ditinggali"]},
+ {id:"w7",g:"w",n:"Kirana",a:25,job:"Roaster kopi · Malang",bio:"Kerja di kopi, tapi tahu kopi bukan dasar hubungan.",d:{tujuan:.55,gaya:.8,kom:.7,fin:.6,nilai:.5},tags:["Camping","Fotografi film","Kopi (profesional)"],must:"Mau diajak bangun pagi lihat sunrise.",bonus:"Tidak minta gula di espresso.",kopi:"hitam",topics:["perjalanan paling spontan","kamera film pertamanya"]},
+ {id:"w8",g:"w",n:"Laras",a:27,job:"Guru TK · Semarang",bio:"Kesabaran level profesional. Kecuali untuk “sibuk” tiga hari.",d:{tujuan:.95,gaya:.3,kom:.85,fin:.2,nilai:.95},tags:["Origami","Gereja/Masjid/Pura? Tanya dulu","Masak bareng"],must:"Siap berkomitmen dan dekat dengan keluarga.",bonus:"Bisa bikin pesawat kertas yang terbang jauh.",kopi:"teh",topics:["hal paling lucu yang dikatakan muridnya","tradisi keluarga favorit"]},
+ {id:"m3",g:"m",n:"Bima",a:24,job:"Kreator konten · Jakarta",bio:"Bisa bikin kencan pertama kita viral. Atau tidak, kalau kamu minta.",d:{tujuan:.4,gaya:.85,kom:.6,fin:.8,nilai:.3},tags:["Street food","Konser","Editing"],must:"Mau masuk kamera. Kadang-kadang.",bonus:"Tahu tren sebelum jadi tren.",kopi:"susu",topics:["konten yang paling gagal","konser terbaik yang pernah ditonton"]},
+ {id:"m4",g:"m",n:"Reza",a:27,job:"Koreografer · Bandung",bio:"Ritme hidup teratur. Secara harfiah.",d:{tujuan:.6,gaya:.7,kom:.7,fin:.6,nilai:.5},tags:["Tari","Teater","Night market"],must:"Tidak malu diajak joget di nikahan.",bonus:"Bisa dua langkah dansa dasar.",kopi:"susu",topics:["lagu yang selalu bikin ingin menari","pertunjukan paling berkesan"]},
+ {id:"m5",g:"m",n:"Daniel",a:29,job:"Arsitek · Jakarta",bio:"Membangun rumah itu mudah. Komitmen, itu proyek seumur hidup.",d:{tujuan:.9,gaya:.45,kom:.8,fin:.3,nilai:.7},tags:["Sketsa","Bersepeda","Kopi hitam"],must:"Punya rencana, walau masih draf.",bonus:"Suka jalan kaki keliling kota tua.",kopi:"hitam",topics:["bangunan favorit di kotanya","rumah impian, versi realistis"]},
+ {id:"m6",g:"m",n:"Fajar",a:30,job:"Chef · Bali",bio:"Masak untuk dua orang lebih efisien. Sudah saya hitung.",d:{tujuan:.85,gaya:.4,kom:.75,fin:.4,nilai:.85},tags:["Pasar tradisional","Surfing","Sambal"],must:"Jujur kalau masakannya keasinan.",bonus:"Berani makan pedas level 5.",kopi:"hitam",topics:["masakan rumah yang paling dirindukan","bahan pasar paling underrated"]},
+ {id:"m7",g:"m",n:"Arka",a:23,job:"Mahasiswa S2 · Depok",bio:"Masih revisi tesis. Jadi paham rasanya ketidakpastian.",d:{tujuan:.5,gaya:.5,kom:.65,fin:.2,nilai:.4},tags:["Perpustakaan","Futsal","Anime"],must:"Sabar menunggu jadwal sidang.",bonus:"Bisa bantu format daftar pustaka.",kopi:"susu",topics:["topik tesisnya dalam satu kalimat","anime yang harus ditonton"]},
+ {id:"m8",g:"m",n:"Kevin",a:28,job:"Product manager · Jakarta",bio:"Roadmap jelas. Termasuk roadmap hubungan.",d:{tujuan:.8,gaya:.55,kom:.9,fin:.35,nilai:.55},tags:["Tenis","Buku bisnis","Weekend getaway"],must:"Bisa diskusi tanpa defensif.",bonus:"Tidak pakai istilah “sinergi” di kencan.",kopi:"hitam",topics:["keputusan paling sulit di kantornya","buku yang mengubah cara pikirnya"]},
+ {id:"m9",g:"m",n:"Yusuf",a:26,job:"Pemandu wisata alam · Lombok",bio:"Suka naik gunung. Bisa turun gunung kalau kamu tidak suka.",d:{tujuan:.7,gaya:.95,kom:.7,fin:.5,nilai:.7},tags:["Hiking","Snorkeling","Api unggun"],must:"Tidak panik kalau sinyal hilang.",bonus:"Bisa masak mi instan di ketinggian 2.000 mdpl.",kopi:"teh",topics:["pemandangan terbaik yang pernah dilihat","cerita tersesat paling lucu"]}
+];
+
+const Q=[
+ {id:"seek",t:"Kamu sedang mencari…",o:[["Pria",{seek:"m"}],["Wanita",{seek:"w"}],["Siapa saja yang tepat",{seek:"a"}]]},
+ {id:"tujuan",t:"Tujuan hubunganmu saat ini?",o:[["Menikah dalam 1–3 tahun",{tujuan:1}],["Serius, tapi pelan-pelan",{tujuan:.75}],["Kenalan dulu, lihat chemistry",{tujuan:.45}],["“Ya dijalani aja dulu”",{tujuan:.15}]]},
+ {id:"gaya",t:"Malam Minggu idealmu?",o:[["Masak di rumah, nonton film",{gaya:.1}],["Coba kafe atau restoran baru",{gaya:.5}],["Road trip dadakan",{gaya:.95}],["Tergantung saldo",{gaya:.4,fin:.25}]]},
+ {id:"kom",t:"Kalau ada masalah, kamu…",o:[["Langsung dibahas baik-baik",{kom:.95}],["Tenangkan diri, baru bicara",{kom:.7}],["Kirim meme sebagai kode",{kom:.35}],["Diam. Dia harus peka.",{kom:.05,flag:1}]]},
+ {id:"fin",t:"Soal uang dalam hubungan?",o:[["Rencanakan & menabung bersama",{fin:.15}],["Split bill, biar adil",{fin:.45}],["Yang mengajak, yang bayar",{fin:.6}],["YOLO. Uang bisa dicari.",{fin:.95}]]},
+ {id:"nilai",t:"Lima tahun lagi, fokusmu…",o:[["Karier dulu",{nilai:.1}],["Seimbang karier & keluarga",{nilai:.5}],["Membangun keluarga",{nilai:.9}]]},
+ {id:"demands",multi:1,t:"Pasanganmu <em>harus</em>…",sub:"Pilih semua yang menurutmu wajib.",o:["Tinggi 180 cm+","Mapan","Humoris","Komunikatif","Seiman","Good looking","Rajin olahraga","Balas chat < 5 menit","Punya visi","Suka anak","Akur dengan keluargaku","Bisa masak","Selalu ada saat dibutuhkan"]},
+ {id:"offers",multi:1,t:"Yang bisa <em>kamu</em> tawarkan…",sub:"Jujur saja. Tidak ada yang melihat, kecuali algoritma kami.",o:["Pendengar yang baik","Konsisten kasih kabar","Stabil finansial","Humor","Masakan enak","Siap komitmen","Sabar","Rapi & terencana","Aku orangnya memang begini"]},
+ {id:"kopi",t:"Terakhir: kopi?",sub:"Tenang, ini tidak masuk perhitungan.",o:[["Hitam, tanpa gula",{kopi:"hitam"}],["Susu & gula aren",{kopi:"susu"}],["Teh saja",{kopi:"teh"}],["Tidak minum kopi",{kopi:"none"}]]}
+];
+
+const PLANS=[
+ {id:"kenalan",n:"Kenalan Dulu",p:99000,f:["Love Profile Assessment","Konsultasi awal 1 sesi","Peta prioritas: wajib vs bonus"]},
+ {id:"cocok",n:"Cari yang Cocok",p:299000,f:["Semua di Kenalan Dulu","Hingga 3 kandidat terkurasi","Laporan kecocokan"],hot:1},
+ {id:"serius",n:"Serius Nih?",p:599000,f:["Matchmaking personal","First Date Concierge","Evaluasi setelah kencan"]}
+];
+
+const NOTES=[
+ ["JODOH Inc.","Buka dengan tenang: “Kami tidak menjanjikan cinta sejati. Kami membantu mengurangi kandidat yang tidak tepat.” Perkenalkan tim (nomor absen), lalu nama perusahaan."],
+ ["Lebih rumit dari skripsi","Skripsi setidaknya jelas judulnya. Pasangan: cocok fisik, beda visi. Cocok visi, beda agama. Cocok semua, ternyata belum selesai dengan masa lalunya. Di situ JODOH Inc. masuk."],
+ ["Masalahnya","Bertemu orang baru makin mudah, yang cocok tetap sulit. Kriteria makin panjang, seperti lowongan direksi. Ditanya apa yang ditawarkan: “aku orangnya memang begini.” Boleh standar tinggi, asal seimbang."],
+ ["Cara kerja","Tiga layanan: Assessment, Matchmaking, First Date Concierge. Kami tanya: kamu cari pasangan hidup atau teman isi waktu luang? Kadang yang satu cari pasangan hidup, yang lain belum bisa memutuskan mau makan apa."],
+ ["Laporan kecocokan","Contoh profil fiktif. Kami ukur nilai, tujuan, cara komunikasi. Selera kopi beda jauh, dan itu tidak apa-apa: bobotnya nol."],
+ ["Paket","Tiga paket. Pendapatan dari konsultasi, paket matchmaking, dan add-on perencanaan kencan. Harga transparan. Tegaskan: tidak termasuk jaminan dapat pasangan. Kami bukan pabrik perasaan."],
+ ["Kenapa JODOH Inc.","Personal, terarah, transparan. Data klien dikelola dengan persetujuan. Kami tidak menjanjikan setiap pertemuan berakhir romantis; keputusan tetap di tangan kedua orang."],
+ ["Penutup","Kami tidak bisa menjamin jodoh. Tapi bisa membantu Anda tidak menghabiskan tiga bulan untuk orang yang sejak awal tidak serius. (jeda) “JODOH Inc.: mencari pasangan, bukan menambah daftar mantan.” Terima kasih."]
+];
+const TEAM=[["12","Rachel Christie"],["13","Michaela"],["14","Kayla Fausta Natania Sada"],["15","Naisyirah Ramadhani Tuasikal"],["18","Rizal Fahmi"]];
+
+const DATES={
+ tenang:{hemat:["Taman kota sore hari + es teh","Piknik kecil, bawa bekal masing-masing, tukar setengah"],sedang:["Kelas masak berdua","Masak satu menu bersama, lalu makan hasilnya (apa pun hasilnya)"],spesial:["Makan malam omakase","Duduk di bar, biar chef yang mencairkan suasana"]},
+ kota:{hemat:["Food street + jalan kaki","Tiga jajanan, tiga penilaian: skor 1–10, debat dibolehkan"],sedang:["Museum lalu kafe","Pilih satu karya favorit masing-masing, jelaskan dalam 1 menit"],spesial:["Rooftop dinner","Pesan tempat saat sunset. Matikan notifikasi."]},
+ luar:{hemat:["Sunrise di bukit terdekat","Bawa termos, berangkat subuh, sarapan di warung bawah"],sedang:["Bersepeda + brunch","Rute 10 km, berhenti di tempat makan yang belum pernah dicoba"],spesial:["Day trip ke pantai","Snorkeling pagi, makan ikan bakar sore, pulang sebelum gelap"]}
+};
+const PLANB=["Main 20 pertanyaan versi “lebih baik mana”.","Tukar HP 1 menit, lihat 3 foto terakhir di galeri.","Ceritakan rencana hidup terburuk yang pernah kamu punya.","Pesan menu yang dipilihkan satu sama lain.","Tebak-tebakan: apa makanan masa kecil favoritnya?"];
+
+/* ================= state ================= */
+const KEY="jodoh.v1";
+let S=load();
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return{}}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+S.seen=S.seen||{};S.matches=S.matches||[];S.hist=S.hist||[];
+
+const $=s=>document.querySelector(s);
+const fmt=n=>n.toLocaleString("id-ID");
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove("on"),2600)}
+
+/* ================= router ================= */
+const NOTAB=["quiz"];
+let cur="home";
+function go(id,arg){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id===id));
+  document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.go===id));
+  document.body.classList.toggle("notab",NOTAB.includes(id));
+  $("#match").classList.remove("on");cur=id;(R[id]||(()=>{}))(arg);
+  const sc=$("#"+id);if(sc)sc.scrollTop=0;
+}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-go]");if(b)go(b.dataset.go,b.dataset.arg)});
+const R={};
+
+/* ================= scoring ================= */
+function score(c){
+  const p=S.profile;if(!p)return null;
+  let s=0;for(const k in W)s+=W[k]*Math.abs(p.d[k]-c.d[k]);
+  let v=100-s*120;
+  if(p.flag)v-=4;
+  return Math.max(31,Math.min(97,Math.round(v)));
+}
+function gap(c){const p=S.profile;let best=null,bv=-1;for(const k in W){const v=W[k]*Math.abs(p.d[k]-c.d[k]);if(v>bv){bv=v;best=k}}return best}
+const GAPLINE={
+ tujuan:c=>S.profile.d.tujuan<c.d.tujuan?`${c.n} cari yang serius. Kamu masih “dijalani aja dulu”.`:`Kamu sudah siap serius, ${c.n} masih santai. Waktu kalian beda.`,
+ kom:c=>`Cara kalian menyelesaikan masalah terlalu berbeda. Yang satu bicara, yang satu kirim meme.`,
+ nilai:c=>`Prioritas lima tahun kalian beda arah. Mending tahu sekarang daripada nanti.`,
+ gaya:c=>S.profile.d.gaya<c.d.gaya?`${c.n} mau road trip, kamu mau rebahan. Tim kami angkat tangan.`:`Kamu mau keliling, ${c.n} mau di rumah. Ada yang harus mengalah tiap minggu.`,
+ fin:c=>`Pandangan soal uang kalian bertabrakan. Ini lebih penting daripada selera kopi.`
+};
+
+/* ================= HOME ================= */
+R.home=()=>{
+  const p=S.profile,m=$("#homeMain");
+  $("#greet").textContent=p?"Profil kamu sudah siap":"Selamat datang";
+  if(!p){
+    m.innerHTML=`<div class="panel" style="margin-top:14px"><div class="kick">Langkah 1</div><h2>Love Profile Assessment</h2>
+      <p class="sub">9 pertanyaan, 2 menit. Supaya kami tahu yang kamu butuhkan, bukan cuma yang bagus di foto.</p>
+      <div class="sp"></div><button class="btn" data-go="quiz">Mulai tes</button></div>`;
+  }else{
+    const n=S.matches.length;
+    m.innerHTML=`<button class="panel mycard" data-go="result" style="margin-top:14px;width:100%;text-align:left">
+      <div class="badge">${p.arch.n[0]}</div><div><div class="kick">Profilmu</div><div class="serif" style="font-size:24px;margin-top:4px">${p.arch.n}</div>
+      <small style="color:var(--mute);font-size:13px">${n?n+" match · ":""}lihat hasil lengkap ›</small></div></button>`;
+  }
+};
+
+/* ================= QUIZ ================= */
+let qi=0,ans={};
+R.quiz=()=>{qi=0;ans={};renderQ()};
+$("#qBack").onclick=()=>{if(qi>0){qi--;renderQ()}else go("home")};
+function renderQ(){
+  const q=Q[qi];$("#qNum").textContent=`${qi+1} / ${Q.length}`;$("#qBar").style.width=((qi)/Q.length*100)+"%";
+  const b=$("#qBody");
+  if(q.multi){
+    const sel=new Set(ans[q.id]||[]);
+    b.innerHTML=`<div class="qanim"><h1>${q.t}</h1><p class="sub">${q.sub}</p><div class="multi">${q.o.map(o=>`<button class="opt ${sel.has(o)?"sel":""}">${o}</button>`).join("")}</div>
+      <div class="qnav"><button class="btn" id="qNext">Lanjut${sel.size?` (${sel.size})`:""}</button></div></div>`;
+    b.querySelectorAll(".opt").forEach(e=>e.onclick=()=>{const t=e.textContent;sel.has(t)?sel.delete(t):sel.add(t);ans[q.id]=[...sel];e.classList.toggle("sel");
+      $("#qNext").textContent="Lanjut"+(sel.size?` (${sel.size})`:"")});
+    $("#qNext").onclick=()=>{ans[q.id]=[...sel];next()};
+  }else{
+    b.innerHTML=`<div class="qanim"><h1>${q.t}</h1>${q.sub?`<p class="sub">${q.sub}</p>`:""}<div class="opts">${q.o.map((o,i)=>`<button class="opt ${ans[q.id]===i?"sel":""}" data-i="${i}">${o[0]}</button>`).join("")}</div></div>`;
+    b.querySelectorAll(".opt").forEach(e=>e.onclick=()=>{ans[q.id]=+e.dataset.i;b.querySelectorAll(".opt").forEach(x=>x.classList.remove("sel"));e.classList.add("sel");setTimeout(next,260)});
+  }
+}
+function next(){if(qi<Q.length-1){qi++;renderQ()}else finish()}
+function finish(){
+  const d={tujuan:.5,gaya:.5,kom:.5,fin:.5,nilai:.5};let seek="a",flag=0,kopi="susu";
+  Q.forEach(q=>{if(q.multi)return;const v=q.o[ans[q.id]]?.[1]||{};for(const k in v){if(k in d)d[k]=v[k];if(k==="seek")seek=v[k];if(k==="flag")flag=1;if(k==="kopi")kopi=v[k]}});
+  const p={d,seek,flag,kopi,demands:ans.demands||[],offers:ans.offers||[]};
+  p.arch=arch(d);S.profile=p;S.seen={};S.hist=[];save();
+  $("#qBar").style.width="100%";
+  go("result",true);
+}
+function arch(d){
+  if(d.tujuan>=.7&&d.gaya<.6)return{n:"Arsitek Rumah Tangga",t:"Kamu tahu mau ke mana, dan lebih suka sampai di sana dengan tenang. Kandidat yang cocok: yang punya rencana, bukan cuma wacana."};
+  if(d.tujuan>=.7)return{n:"Petualang yang Siap Menetap",t:"Hidupmu penuh rencana perjalanan, dan salah satunya adalah pulang ke orang yang sama. Cari yang mau ikut jalan, bukan cuma ikut story."};
+  if(d.tujuan>=.4)return{n:"Romantis Realistis",t:"Kamu percaya cinta, tapi juga percaya spreadsheet. Pelan, terarah, dan tidak mudah terkecoh “sama-sama suka kopi”."};
+  if(d.gaya>=.5)return{n:"Penjelajah Bebas",t:"Kamu sedang menikmati perjalanan, belum mencari tujuan. Tidak apa-apa, asal jujur sejak awal ke kandidat."};
+  return{n:"Masih Survei Pasar",t:"Kamu sedang melihat-lihat. Saran kami: kenali diri dulu sebelum mengenalkan diri."};
+}
+function standar(p){
+  const d=p.demands.length,joke=p.offers.includes("Aku orangnya memang begini"),o=p.offers.filter(x=>x!=="Aku orangnya memang begini").length;
+  let v;
+  if(joke&&o<2)v="Kamu menawarkan: “aku orangnya memang begini.” Tim kami sedang rapat darurat.";
+  else if(d>=o+4)v="Lowongan level direksi. Pengalaman yang ditawarkan: magang.";
+  else if(d>o)v="Sedikit timpang, tapi masih bisa dinegosiasikan.";
+  else if(d===0)v="Kamu tidak punya syarat sama sekali. Ini juga perlu dibicarakan.";
+  else v="Seimbang. HRD kami terkesan.";
+  const ratio=d?Math.round(Math.min(o/d,1.5)*100):100;
+  return{d,o,joke,v,ratio};
+}
+function recPlan(p){return p.d.tujuan>=.8?"serius":p.d.tujuan>=.45?"cocok":"kenalan"}
+
+/* ================= RESULT ================= */
+R.result=(fresh)=>{
+  const p=S.profile;if(!p){go("quiz");return}
+  const st=standar(p),plan=PLANS.find(x=>x.id===recPlan(p));
+  $("#result").innerHTML=`
+  <div class="top"><button class="back" data-go="home">‹ Beranda</button><button class="chip" id="redo">Ulangi tes</button></div>
+  <div class="res-hero"><div class="kick">Love Profile kamu</div><div class="seal"><img src="../media/logo.svg" alt=""></div>
+    <h1 style="font-size:40px">${p.arch.n}</h1><p class="sub" style="margin:10px auto 0;max-width:340px">${p.arch.t}</p></div>
+  <div class="panel" style="margin-top:20px"><div class="kick" style="margin-bottom:14px">Peta prioritas</div><div class="bars">
+    ${[["Siap serius","tujuan"],["Bicara langsung","kom"],["Fokus keluarga","nilai"],["Suka petualangan","gaya"],["Santai soal uang","fin"]].map(([l,k])=>`<div class="bar"><label><span>${l}</span><span>${Math.round(p.d[k]*100)}%</span></label><div class="t"><i data-w="${p.d[k]*100}"></i></div></div>`).join("")}
+  </div>${p.flag?`<p class="sub" style="margin-top:14px">⚠ Catatan: “dia harus peka” bukan strategi komunikasi.</p>`:""}</div>
+  <div class="panel" style="margin-top:12px"><div class="kick">Cek standar</div>
+    <div class="meter" style="margin-top:10px"><div class="big">${st.d}<span style="font-size:22px;color:var(--mute)"> : </span>${st.o}</div><small style="color:var(--mute);font-size:13px;line-height:1.35">syarat yang kamu minta<br>vs hal yang kamu tawarkan</small></div>
+    <div class="verdict">${st.v}</div></div>
+  <div class="panel" style="margin-top:12px"><div class="kick">Rekomendasi paket</div><h2>${plan.n}</h2><p class="sub">Rp${fmt(plan.p)} · ${plan.f[1]}</p></div>
+  <div class="sp"></div>
+  <button class="btn" data-go="swipe">Lihat kandidat yang cocok</button><div style="height:10px"></div>
+  <button class="btn ghost" id="shareBtn">Bagikan kartu profil</button>`;
+  requestAnimationFrame(()=>setTimeout(()=>$("#result").querySelectorAll(".bar i").forEach(i=>i.style.width=i.dataset.w+"%"),80));
+  $("#redo").onclick=()=>go("quiz");
+  $("#shareBtn").onclick=()=>shareCard(p,st);
+  if(fresh===true){confetti();toast("Profil selesai. Selera kopimu sudah kami abaikan.")}
+};
+
+/* ================= STANDAR (standalone) ================= */
+R.standar=()=>{
+  if(!S.profile){toast("Isi Love Profile dulu, ya.");go("quiz");return}
+  const p=S.profile,st=standar(p);
+  $("#standar").innerHTML=`<div class="top"><button class="back" data-go="home">‹ Beranda</button></div>
+  <div class="kick">Cek standar</div><h1>Lowongan: <em>Pasangan Hidup</em></h1>
+  <div class="panel" style="margin-top:18px;background:var(--cream);color:#2a0d13;border:0">
+    <div style="display:flex;justify-content:space-between;border-bottom:2px solid #2a0d13;padding-bottom:10px;font-weight:800;font-size:11px;letter-spacing:.2em"><span>DICARI</span><span>${st.d} SYARAT</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:12px">${(p.demands.length?p.demands:["(tidak ada syarat)"]).map(x=>`<span class="chip" style="background:#ead9bb;border-color:#d6c09a">✓ ${x}</span>`).join("")}</div>
+    <div style="font-weight:800;font-size:11px;letter-spacing:.2em;margin-top:18px;color:var(--wine)">YANG DITAWARKAN PELAMAR</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">${(p.offers.length?p.offers:["(kosong)"]).map(x=>`<span class="chip" style="background:#fff;border-color:#d6c09a">${x}</span>`).join("")}</div>
+  </div>
+  <div class="panel" style="margin-top:12px"><div class="kick">Rasio keseimbangan</div>
+    <div class="bar" style="margin-top:12px"><div class="t" style="height:10px"><i data-w="${Math.min(st.ratio,100)}"></i></div></div>
+    <div class="verdict">${st.v}</div></div>
+  <div class="sp"></div><button class="btn ghost" data-go="quiz">Ubah jawaban</button>`;
+  setTimeout(()=>$("#standar").querySelectorAll(".bar i").forEach(i=>i.style.width=i.dataset.w+"%"),80);
+};
+
+/* ================= SWIPE ================= */
+let filter=null;
+function pool(){
+  const seek=filter||(S.profile?S.profile.seek:"a");
+  return C.filter(c=>(seek==="a"||c.g===seek)&&!S.seen[c.id]);
+}
+R.swipe=()=>{
+  if(!S.profile){$("#deck").innerHTML=`<div class="empty"><div class="serif" style="font-size:28px">Kenali dirimu dulu.</div><p class="sub">Kami tidak menyodorkan kandidat ke orang yang belum tahu mau apa.</p><button class="btn sm" data-go="quiz" style="max-width:220px">Mulai tes (2 menit)</button></div>`;return}
+  const f=filter||S.profile.seek;$("#filterBtn").textContent=f==="m"?"Pria":f==="w"?"Wanita":"Semua";
+  renderDeck();
+};
+$("#filterBtn").onclick=()=>{const order=["a","w","m"];const f=filter||(S.profile?S.profile.seek:"a");filter=order[(order.indexOf(f)+1)%3];R.swipe()};
+function renderDeck(){
+  const list=pool().sort((a,b)=>score(b)-score(a)).slice(0,3).reverse(),deck=$("#deck");
+  if(!list.length){deck.innerHTML=`<div class="empty"><div class="serif" style="font-size:28px">Kandidat habis.</div><p class="sub">Ini bukan kegagalan. Ini proses seleksi.</p><button class="btn sm ghost" id="resetSeen" style="max-width:220px">Lihat ulang yang dilewati</button></div>`;
+    $("#resetSeen").onclick=()=>{for(const k in S.seen)if(S.seen[k]==="nope")delete S.seen[k];save();renderDeck()};return}
+  deck.innerHTML=list.map((c,i)=>{const s=score(c),r=26,cc=2*Math.PI*r;
+    return `<div class="cand" data-id="${c.id}" style="transform:scale(${1-(list.length-1-i)*.04}) translateY(${(list.length-1-i)*12}px);z-index:${i}">
+      <img src="img/${c.id}.jpg" alt="${c.n}"><div class="shade"></div><span class="fic">PROFIL FIKTIF</span>
+      <svg class="score" viewBox="0 0 62 62"><circle cx="31" cy="31" r="${r}" fill="rgba(16,4,7,.65)" stroke="rgba(255,255,255,.2)" stroke-width="4"/>
+        <circle cx="31" cy="31" r="${r}" fill="none" stroke="${s>=75?"#f2dba6":s>=60?"#d2ab6c":"#c2475f"}" stroke-width="4" stroke-linecap="round" stroke-dasharray="${cc*s/100} ${cc}" transform="rotate(-90 31 31)"/></svg>
+      <b class="score" style="display:grid;place-items:center;font-weight:800;font-size:15px">${s}%</b>
+      <div class="stampx yes">SUKA</div><div class="stampx no">LEWAT</div><div class="stampx sup">SERIUS</div>
+      <div class="info"><div class="nm">${c.n}<span>${c.a}</span></div><div class="job">${c.job}</div><div class="bio">“${c.bio}”</div>
+        <div class="detail"><div class="tags">${c.tags.map(t=>`<span class="chip">${t}</span>`).join("")}</div>
+          <p><b>Wajib:</b> ${c.must}<br><b>Bonus:</b> ${c.bonus}</p>
+          <p><b>Beda terbesar dengan kamu:</b> ${DIMS[gap(c)].toLowerCase()}.<br><b>Selera kopi:</b> ${c.kopi===S.profile.kopi?"sama":"beda"} (bobot 0%).</p></div></div>
+    </div>`}).join("");
+  const top=deck.lastElementChild;bindDrag(top);
+}
+function bindDrag(el){
+  let x0,y0,dx=0,dy=0,t0,drag=false;
+  const sy=el.querySelector(".yes"),sn=el.querySelector(".no"),ss=el.querySelector(".sup");
+  el.onpointerdown=e=>{drag=true;x0=e.clientX;y0=e.clientY;t0=Date.now();el.setPointerCapture(e.pointerId);el.style.transition="none"};
+  el.onpointermove=e=>{if(!drag)return;dx=e.clientX-x0;dy=e.clientY-y0;
+    el.style.transform=`translate(${dx}px,${dy}px) rotate(${dx*.06}deg)`;
+    sy.style.opacity=Math.max(0,dx/100);sn.style.opacity=Math.max(0,-dx/100);ss.style.opacity=Math.max(0,(-dy-Math.abs(dx))/110)};
+  el.onpointerup=el.onpointercancel=e=>{if(!drag)return;drag=false;
+    const v=Math.abs(dx)/(Date.now()-t0);
+    if(Math.abs(dx)<6&&Math.abs(dy)<6){el.classList.toggle("open");el.style.transform="";return}
+    if(-dy>120&&-dy>Math.abs(dx))fly(el,"super");
+    else if(dx>110||(dx>40&&v>.6))fly(el,"like");
+    else if(dx<-110||(dx<-40&&v>.6))fly(el,"nope");
+    else{el.style.transition="transform .4s cubic-bezier(.2,1.4,.4,1)";el.style.transform="";[sy,sn,ss].forEach(s=>s.style.opacity=0)}
+    dx=dy=0};
+}
+function fly(el,kind){
+  const id=el.dataset.id,c=C.find(x=>x.id===id);
+  el.style.transition="transform .45s cubic-bezier(.4,0,.6,1),opacity .45s";
+  el.style.transform=kind==="super"?"translate(0,-130%) rotate(-4deg)":`translate(${kind==="like"?140:-140}%,30px) rotate(${kind==="like"?24:-24}deg)`;
+  el.style.opacity=.2;
+  S.seen[id]=kind;S.hist.push(id);save();
+  setTimeout(()=>{renderDeck();decide(c,kind)},380);
+}
+function topCard(){return $("#deck .cand:last-child")}
+$("#likeBtn").onclick=()=>{const t=topCard();t&&fly(t,"like")};
+$("#nopeBtn").onclick=()=>{const t=topCard();t&&fly(t,"nope")};
+$("#supBtn").onclick=()=>{const t=topCard();t&&fly(t,"super")};
+$("#infoBtn").onclick=()=>{const t=topCard();t&&t.classList.toggle("open")};
+$("#undoBtn").onclick=()=>{const id=S.hist.pop();if(!id){toast("Belum ada yang dilewati.");return}delete S.seen[id];S.matches=S.matches.filter(m=>m!==id);save();renderDeck();updDot();toast("Oke, kami pura-pura tidak lihat.")};
+const NOPE=["Dilewati. Tidak ada yang tersinggung (secara resmi).","Keputusan berani. Kami hormati.","Lewat. Tapi jangan bilang ini karena kopinya.","Noted. Tim kami mencatat dengan wajah datar."];
+function decide(c,kind){
+  if(kind==="nope"){toast(pick(NOPE));return}
+  const s=score(c),th=kind==="super"?68:75;
+  if(s>=th){if(!S.matches.includes(c.id))S.matches.push(c.id);save();updDot();showMatch(c,s)}
+  else toast(`${c.n} belum membalas. ${GAPLINE[gap(c)](c)}`);
+}
+function showMatch(c,s){
+  const m=$("#match"),p=S.profile;
+  m.innerHTML=`<div class="kick">Kecocokan ${s}%</div><h1>Cocok secara <em>data.</em></h1>
+    <div class="pair"><div class="me">${p.arch.n[0]}</div><img src="img/${c.id}.jpg" alt=""></div>
+    <p class="sub">Kamu dan ${c.n} sama-sama ${c.d.tujuan>.7&&p.d.tujuan>.7?"serius soal hubungan":"terbuka untuk mengenal lebih jauh"}. Sisanya urusan kalian berdua.</p>
+    <div class="btns"><button class="btn" id="mPlan">Rencanakan kencan pertama</button><button class="btn ghost" id="mLater">Lanjut lihat kandidat</button></div>`;
+  m.classList.add("on");confetti();
+  $("#mPlan").onclick=()=>{m.classList.remove("on");go("date",c.id)};
+  $("#mLater").onclick=()=>m.classList.remove("on");
+}
+function updDot(){const d=$("#mDot");d.textContent=S.matches.length;d.style.display=S.matches.length?"block":"none"}
+
+/* ================= MATCHES ================= */
+R.matches=()=>{
+  const list=S.matches.map(id=>C.find(c=>c.id===id)).filter(Boolean);
+  $("#matches").innerHTML=`<div class="kick">First Date Concierge</div><h1>Match <em>kamu</em></h1>
+    <p class="sub">Pilih satu, kami siapkan rencana kencan pertama yang tidak membosankan.</p>
+    ${list.length?`<div class="mlist">${list.map(c=>`<button class="mitem" data-go="date" data-arg="${c.id}"><img src="img/${c.id}.jpg" alt=""><div><b>${c.n}, ${c.a}</b><small>${c.job}</small></div><span class="pc">${score(c)}%</span></button>`).join("")}</div>`
+      :`<div class="empty" style="position:relative;margin-top:24px;min-height:260px"><div class="serif" style="font-size:26px">Belum ada match.</div><p class="sub">Itu normal. Yang tidak normal: match dengan semua orang.</p><button class="btn sm" data-go="swipe" style="max-width:220px">Lihat kandidat</button></div>`}`;
+};
+
+/* ================= DATE PLAN ================= */
+let budget="sedang";
+R.date=(id)=>{
+  const c=C.find(x=>x.id===id)||C.find(x=>x.id===S.matches[0]);if(!c||!S.profile){go("matches");return}
+  const p=S.profile,g=(p.d.gaya+c.d.gaya)/2,vibe=g<.4?"tenang":g<.7?"kota":"luar";
+  const draw=()=>{
+    const [place,act]=DATES[vibe][budget],cost={hemat:"< Rp100 rb",sedang:"Rp100–300 rb",spesial:"Rp300 rb+"}[budget];
+    const pay=p.d.fin<.3&&c.d.fin<.3?"Split bill. Kalian berdua tipe yang mencatat pengeluaran.":p.d.fin>.55?"Kamu yang mengajak, kamu yang bayar. Itu jawabanmu sendiri.":"Bayar masing-masing, atau gantian di kencan kedua.";
+    $("#plan").innerHTML=`
+      <div class="pstep"><span class="t">01</span><div><b>${place}</b><small>${act}</small></div></div>
+      <div class="pstep"><span class="t">02</span><div><b>Pembuka obrolan</b><small>Tanya soal ${c.topics[0]}. Kalau lancar, lanjut ke ${c.topics[1]}.</small></div></div>
+      <div class="pstep"><span class="t">03</span><div><b>Hindari</b><small>Membahas mantan, gaji, dan “kenapa masih single”. Juga: kopi sebagai bukti jodoh.</small></div></div>
+      <div class="pstep"><span class="t">04</span><div><b>Plan B kalau garing</b><small id="pb">${pick(PLANB)}</small></div></div>
+      <div class="pstep"><span class="t">05</span><div><b>Budget & bayar</b><small>${cost}. ${pay}</small></div></div>
+      <div class="pstep" style="border:0"><span class="t">06</span><div><b>Aturan JODOH</b><small>Maksimal 2 jam. Pulang saat masih seru, bukan saat sudah habis bahan.</small></div></div>`;
+  };
+  $("#date").innerHTML=`<button class="back" data-go="matches">‹ Match</button>
+    <div class="row" style="margin-top:10px"><img src="img/${c.id}.jpg" style="width:64px;height:84px;object-fit:cover;border-radius:14px" alt="">
+      <div><div class="kick">Kencan pertama dengan</div><h2 style="margin-top:4px">${c.n}, ${c.a}</h2><small style="color:var(--mute)">Suasana: ${{tenang:"tenang & hangat",kota:"jalan-jalan kota",luar:"udara terbuka"}[vibe]}</small></div></div>
+    <div class="seg" id="seg">${["hemat","sedang","spesial"].map(b=>`<button data-b="${b}" class="${b===budget?"on":""}">${b[0].toUpperCase()+b.slice(1)}</button>`).join("")}</div>
+    <div class="plan" id="plan"></div>
+    <div class="sp"></div><button class="btn" id="invite">Kirim ajakan</button><div style="height:10px"></div>
+    <button class="btn ghost" id="reroll">Acak Plan B</button>`;
+  draw();
+  $("#seg").onclick=e=>{const b=e.target.closest("button");if(!b)return;budget=b.dataset.b;$("#seg").querySelectorAll("button").forEach(x=>x.classList.toggle("on",x===b));draw()};
+  $("#reroll").onclick=()=>{$("#pb").textContent=pick(PLANB)};
+  $("#invite").onclick=async()=>{
+    const txt=`Hai ${c.n}! Menurut JODOH Inc. kita ${score(c)}% cocok (selera kopi tidak dihitung). Mau ${DATES[vibe][budget][0].toLowerCase()} akhir pekan ini?`;
+    try{if(navigator.share){await navigator.share({text:txt});return}}catch(e){return}
+    try{await navigator.clipboard.writeText(txt);toast("Ajakan disalin. Kirim sendiri, ya. Kami cuma mak comblang.")}catch(e){toast(txt)}
+  };
+};
+
+/* ================= PLANS ================= */
+R.plans=()=>{
+  const rec=S.profile?recPlan(S.profile):null;
+  $("#plans").innerHTML=`<div class="kick">Pilih paketmu</div><h1>Choose your <em>love plan.</em></h1>
+    <p class="sub">Harga simulasi. Belum termasuk biaya kencan, ongkos parkir, dan jaminan perasaan.</p>
+    ${PLANS.map(p=>`<div class="pcard ${p.hot?"hot":""} ${p.id===rec?"rec":""}">${p.id===rec?`<span class="tag">COCOK UNTUKMU</span>`:p.hot?`<span class="tag">PALING REALISTIS</span>`:""}
+      <h3>${p.n}</h3><div class="pr"><small>Rp</small>${fmt(p.p)}</div><ul>${p.f.map(f=>`<li>${f}</li>`).join("")}</ul>
+      <button class="btn sm" data-buy="${p.id}">Pilih paket</button></div>`).join("")}
+    <p class="sub" style="text-align:center;font-size:13px;margin-top:20px">Kami agensi jodoh, bukan pabrik perasaan.</p>`;
+  $("#plans").querySelectorAll("[data-buy]").forEach(b=>b.onclick=()=>{const p=PLANS.find(x=>x.id===b.dataset.buy);
+    b.textContent="Memproses…";setTimeout(()=>{b.textContent="✓ Terdaftar (simulasi)";confetti();toast(`${p.n} aktif. Tidak ada uang yang berpindah. Perasaan juga belum.`)},700)});
+};
+
+/* ================= PRESENTER ================= */
+const TARGET=6*60;let tStart=null,tAcc=0,tInt=null,slide=0,wake=null;
+function elapsed(){return tAcc+(tStart?(Date.now()-tStart)/1000:0)}
+R.presenter=()=>{
+  $("#presenter").innerHTML=`<div class="top"><div class="kick">Mode presenter</div><a class="chip" href="../" target="_blank" style="color:inherit;text-decoration:none">Buka deck ↗</a></div>
+    <div class="timer" id="tm">0:00</div>
+    <div class="tline"><i id="tl"></i></div><div class="tlabels"><span style="left:0">0:00</span><span style="left:71.4%">5:00</span><span style="left:85.7%">6:00</span><span style="left:100%">7:00</span></div>
+    <div class="row" style="margin-top:14px"><button class="btn sm" id="tGo">Mulai</button><button class="btn sm ghost" id="tRe" style="width:120px">Reset</button></div>
+    <div class="note"><div class="s"><b id="nT"></b><span id="nN"></span></div><p id="nP"></p></div>
+    <div class="row" style="margin-top:12px"><button class="btn sm ghost" id="pPrev">‹ Sebelumnya</button><button class="btn sm" id="pNext">Berikutnya ›</button></div>
+    <div class="panel" style="margin-top:16px"><div class="kick">Tim</div><div class="team">${TEAM.map(([n,m])=>`<div><b>${n}</b>${m}</div>`).join("")}</div></div>
+    <p class="sub" style="font-size:12px;text-align:center;margin-top:14px">Layar tetap menyala selama timer berjalan.</p>`;
+  const show=()=>{$("#nT").textContent=NOTES[slide][0];$("#nN").textContent=`${slide+1} / ${NOTES.length}`;$("#nP").textContent=NOTES[slide][1]};
+  const tick=()=>{const e=elapsed(),m=Math.floor(e/60),s=Math.floor(e%60),el=$("#tm");if(!el)return;
+    el.textContent=`${m}:${String(s).padStart(2,"0")}`;el.className="timer"+(e>420?" over":e>300?" warn":"");$("#tl").style.width=Math.min(e/420*100,100)+"%"};
+  const setBtn=()=>{$("#tGo").textContent=tStart?"Jeda":tAcc?"Lanjut":"Mulai"};
+  $("#tGo").onclick=async()=>{if(tStart){tAcc=elapsed();tStart=null;clearInterval(tInt);releaseWake()}else{tStart=Date.now();tInt=setInterval(tick,250);
+    try{wake=await navigator.wakeLock?.request("screen")}catch(e){}}setBtn()};
+  $("#tRe").onclick=()=>{tStart=null;tAcc=0;clearInterval(tInt);releaseWake();tick();setBtn();slide=0;show()};
+  $("#pPrev").onclick=()=>{slide=Math.max(0,slide-1);show()};
+  $("#pNext").onclick=()=>{slide=Math.min(NOTES.length-1,slide+1);show()};
+  show();tick();setBtn();if(tStart){clearInterval(tInt);tInt=setInterval(tick,250)}
+};
+function releaseWake(){try{wake&&wake.release()}catch(e){}wake=null}
+document.addEventListener("visibilitychange",async()=>{if(document.visibilityState==="visible"&&tStart){try{wake=await navigator.wakeLock?.request("screen")}catch(e){}}});
+
+/* ================= share card ================= */
+async function shareCard(p,st){
+  await document.fonts.ready;
+  const cv=document.createElement("canvas");cv.width=1080;cv.height=1350;const x=cv.getContext("2d");
+  const g=x.createRadialGradient(540,300,50,540,600,900);g.addColorStop(0,"#5a1424");g.addColorStop(1,"#16060a");x.fillStyle=g;x.fillRect(0,0,1080,1350);
+  x.strokeStyle="rgba(210,171,108,.5)";x.lineWidth=2;x.strokeRect(50,50,980,1250);
+  const logo=new Image();logo.src="../media/logo.svg";await new Promise(r=>{logo.onload=r;logo.onerror=r});
+  try{x.drawImage(logo,440,130,200,180)}catch(e){}
+  x.textAlign="center";x.fillStyle="#d2ab6c";x.font="700 26px Manrope";x.fillText("L O V E   P R O F I L E",540,390);
+  x.fillStyle="#f2dba6";x.font="italic 600 92px 'Cormorant Garamond'";
+  wrap(x,p.arch.n,540,500,900,96);
+  const items=[["Siap serius","tujuan"],["Bicara langsung","kom"],["Fokus keluarga","nilai"],["Suka petualangan","gaya"],["Santai soal uang","fin"]];
+  items.forEach(([l,k],i)=>{const y=730+i*78;x.textAlign="left";x.fillStyle="#bba892";x.font="500 30px Manrope";x.fillText(l,140,y);
+    x.fillStyle="rgba(244,232,212,.12)";x.fillRect(140,y+18,800,10);x.fillStyle="#d2ab6c";x.fillRect(140,y+18,800*p.d[k],10)});
+  x.textAlign="center";x.fillStyle="#f4e8d4";x.font="italic 500 40px 'Cormorant Garamond'";wrap(x,`Standar ${st.d} : ${st.o}. ${st.v}`,540,1150,860,46);
+  x.fillStyle="#bba892";x.font="600 24px Manrope";x.fillText("JODOH Inc. · Match people, not just profiles.",540,1262);
+  const blob=await new Promise(r=>cv.toBlob(r,"image/png"));const file=new File([blob],"jodoh-love-profile.png",{type:"image/png"});
+  try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"Love Profile saya"});return}}catch(e){return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=file.name;a.click();toast("Kartu profil diunduh.");
+}
+function wrap(x,t,cx,y,w,lh){const ws=t.split(" ");let line="",lines=[];ws.forEach(wd=>{const tt=line?line+" "+wd:wd;if(x.measureText(tt).width>w&&line){lines.push(line);line=wd}else line=tt});lines.push(line);
+  lines.forEach((l,i)=>x.fillText(l,cx,y+i*lh))}
+
+/* ================= confetti ================= */
+function confetti(){
+  const cv=$("#confetti"),x=cv.getContext("2d"),dpr=Math.min(devicePixelRatio,2);cv.width=innerWidth*dpr;cv.height=innerHeight*dpr;x.scale(dpr,dpr);
+  const cols=["#f2dba6","#d2ab6c","#c2475f","#f4e8d4"];
+  const P=Array.from({length:90},()=>({x:innerWidth/2,y:innerHeight*.4,vx:(Math.random()-.5)*13,vy:-Math.random()*13-4,r:Math.random()*6+4,c:pick(cols),a:Math.random()*6,va:(Math.random()-.5)*.3,h:Math.random()<.35}));
+  let f=0;(function tick(){x.clearRect(0,0,innerWidth,innerHeight);P.forEach(p=>{p.vy+=.35;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.a+=p.va;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;
+    if(p.h){x.font=`${p.r*3}px serif`;x.fillText("♥",0,0)}else x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);x.restore()});
+    if(++f<150)requestAnimationFrame(tick);else x.clearRect(0,0,innerWidth,innerHeight)})();
+}
+
+/* ================= boot ================= */
+updDot();
+go(location.hash==="#presenter"?"presenter":"home");
+if("serviceWorker" in navigator)addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+</script>
+</body>
+</html>

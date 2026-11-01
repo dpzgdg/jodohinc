@@ -171,11 +171,18 @@ p.lead{font-size:22px;line-height:1.5;color:var(--mute);max-width:620px}
 /* ---------- 8 close ---------- */
 .s-close{display:flex;flex-direction:column;justify-content:center;align-items:flex-end;text-align:right;padding-right:96px}
 .s-close::before{content:"";position:absolute;inset:-200px -400px -200px 45%;background:linear-gradient(90deg,transparent,rgba(13,6,8,.78) 45%);z-index:-1}
-.s-close h2{font-size:80px;max-width:760px}
-.s-close .sign{display:flex;align-items:center;gap:22px;margin-top:64px}
+.s-close h2{font-size:74px;max-width:760px}
+.s-close .sign{display:flex;align-items:center;gap:22px;margin-top:44px}
 .s-close .sign img{width:84px}
 .s-close .sign div{font:500 44px/1 var(--serif)}
 .s-close .sign small{display:block;font:500 15px/1.4 var(--sans);color:var(--mute);margin-top:8px;letter-spacing:.04em}
+.s-close .end{display:flex;align-items:center;gap:48px;margin-top:40px}
+.s-close .end .ty{margin-top:0}
+.s-close .qr{display:flex;align-items:center;gap:16px;text-align:left}
+.s-close .qr #qr{width:116px;height:116px;background:var(--cream);border-radius:8px;padding:8px}
+.s-close .qr #qr svg{width:100%;height:100%;display:block}
+.s-close .qr small{font:600 12px/1.5 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.s-close .qr small b{display:block;font:italic 500 24px/1.1 var(--serif);letter-spacing:0;text-transform:none;color:var(--gold-hi);margin-bottom:6px}
 .s-close .ty{margin-top:40px;font:italic 500 64px/1 var(--serif);color:var(--gold-hi)}
 
 @media (prefers-reduced-motion:reduce){#grain{animation:none}}
@@ -317,7 +324,7 @@ p.lead{font-size:22px;line-height:1.5;color:var(--mute);max-width:620px}
     <div class="kicker">Penutup</div>
     <h2><span class="line"><span>Kami tidak menjamin jodoh.</span></span><span class="line"><span>Kami menyelamatkan</span></span><span class="line"><span><em>tiga bulan hidupmu.</em></span></span></h2>
     <div class="sign"><img src="media/logo.svg" alt=""><div>JODOH Inc.<small>Mencari pasangan, bukan menambah daftar mantan.</small></div></div>
-    <div class="ty">Terima kasih.</div>
+    <div class="end"><div class="qr"><small><b>Coba aplikasinya</b>Love Profile · Kandidat<br>First Date Concierge</small><div id="qr"></div></div><div class="ty">Terima kasih.</div></div>
   </section>
 
 </main>
@@ -327,6 +334,7 @@ p.lead{font-size:22px;line-height:1.5;color:var(--mute);max-width:620px}
 <div id="hint">← → navigasi · N catatan · F layar penuh</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
 <script type="module">
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
 
@@ -430,7 +438,8 @@ const build={
   },
   7(s,tl){base(s,tl);
     tl.from(s.querySelector(".sign"),{opacity:0,x:-40,duration:1.2,ease:E},1.3)
-      .from(s.querySelector(".ty"),{opacity:0,y:30,duration:1.4,ease:E},2.2);
+      .from(s.querySelector(".ty"),{opacity:0,y:30,duration:1.4,ease:E},2.2)
+      .from(s.querySelectorAll(".qr"),{opacity:0,scale:.8,duration:1,ease:"back.out(2)"},2.6);
   }
 };
 
@@ -522,7 +531,7 @@ const forms={
 };
 let form="heart",glowT=1,spin=0;
 function setForm(f){form=f;forms[f]();glowT=(f==="heart"||f==="heartR")?1:.55}
-function resize(){renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();view();forms[form]()}
+function resize(){if(!innerWidth||!innerHeight)return;renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();view();forms[form]()}
 addEventListener("resize",resize);resize();
 
 let mx=0,my=0;addEventListener("pointermove",e=>{mx=e.clientX/innerWidth-.5;my=e.clientY/innerHeight-.5});
@@ -531,7 +540,7 @@ const clock=new THREE.Clock();
   const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;mat.uniforms.t.value=t;
   mat.uniforms.glow.value+=(glowT-mat.uniforms.glow.value)*.03;
   const e=reduce?1:1-Math.pow(.025,dt);
-  for(let i=0;i<N*3;i+=3){const k=e*(.55+seed[i/3]*.45);pos[i]+=(tgt[i]-pos[i])*k;pos[i+1]+=(tgt[i+1]-pos[i+1])*k;pos[i+2]+=(tgt[i+2]-pos[i+2])*k}
+  for(let i=0;i<N*3;i+=3){const k=e*(.55+seed[i/3]*.45);if(pos[i]!==pos[i]||pos[i+1]!==pos[i+1]){pos[i]=tgt[i]||0;pos[i+1]=tgt[i+1]||0;pos[i+2]=tgt[i+2]||0}pos[i]+=(tgt[i]-pos[i])*k;pos[i+1]+=(tgt[i+1]-pos[i+1])*k;pos[i+2]+=(tgt[i+2]-pos[i+2])*k}
   geo.attributes.position.needsUpdate=true;
   spin=form.startsWith("heart")?Math.sin(t*.4)*.25:form==="vortex"?0:0;
   pts.rotation.y+=((spin+mx*.25)-pts.rotation.y)*.05;pts.rotation.x+=((my*.15)-pts.rotation.x)*.05;
@@ -539,6 +548,8 @@ const clock=new THREE.Clock();
   renderer.render(scene,camera);requestAnimationFrame(loop);
 })();
 
+try{const q=qrcode(0,"M");q.addData(new URL("app/",location.href.split("#")[0]).href);q.make();
+  document.getElementById("qr").innerHTML=q.createSvgTag({cellSize:4,margin:0,scalable:true}).replace('fill="black"','fill="#16060a"')}catch(e){document.querySelector(".s-close .qr").remove()}
 go(Math.max(0,(parseInt(location.hash.slice(1))||1)-1));
 </script>
 </body>
