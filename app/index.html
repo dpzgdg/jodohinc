@@ -22,16 +22,16 @@
   --maroon:#5a1424;--wine:#8a2338;--rose:#c2475f;
   --cream:#f4e8d4;--mute:#bba892;--gold:#d2ab6c;--gold-hi:#f2dba6;
   --serif:"Cormorant Garamond",Georgia,serif;--sans:"Manrope",-apple-system,system-ui,sans-serif;
-  --st:env(safe-area-inset-top);--sb:env(safe-area-inset-bottom);
+  --st:env(safe-area-inset-top);--sb:env(safe-area-inset-bottom);--h:100dvh;
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;background:var(--ink);color:var(--cream);font-family:var(--sans);overscroll-behavior:none}
+html,body{height:var(--h);background:var(--ink);color:var(--cream);font-family:var(--sans);overscroll-behavior:none}
 body{-webkit-font-smoothing:antialiased;overflow:hidden;-webkit-user-select:none;user-select:none}
 button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
 .serif{font-family:var(--serif)}
 em{font-style:italic;color:var(--gold-hi)}
 
-#app{position:fixed;inset:0;display:flex;flex-direction:column;
+#app{position:fixed;top:0;left:0;right:0;height:var(--h);display:flex;flex-direction:column;
   background:radial-gradient(120% 60% at 50% -10%,#4a1020 0%,transparent 60%),var(--ink)}
 .screen{position:absolute;inset:0;bottom:calc(64px + var(--sb));overflow-y:auto;-webkit-overflow-scrolling:touch;
   padding:calc(var(--st) + 18px) 20px 28px;opacity:0;pointer-events:none;transform:translateY(12px);transition:opacity .35s,transform .45s cubic-bezier(.2,.8,.2,1)}
@@ -40,7 +40,7 @@ em{font-style:italic;color:var(--gold-hi)}
 body.notab #tabs{transform:translateY(110%)}
 
 /* tab bar */
-#tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;height:calc(64px + var(--sb));padding-bottom:var(--sb);display:grid;grid-template-columns:repeat(4,1fr);
+#tabs{position:fixed;left:0;right:0;top:calc(var(--h) - 64px - var(--sb));z-index:20;height:calc(64px + var(--sb));padding-bottom:var(--sb);display:grid;grid-template-columns:repeat(4,1fr);
   background:rgba(22,6,10,.86);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-top:1px solid var(--line);transition:transform .35s}
 #tabs button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--mute);position:relative}
 #tabs svg{width:23px;height:23px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
@@ -64,9 +64,9 @@ p.sub{color:var(--mute);font-size:15px;line-height:1.5;margin-top:10px}
 .panel{background:linear-gradient(160deg,rgba(90,20,36,.55),rgba(34,10,16,.85));border:1px solid rgba(210,171,108,.2);border-radius:20px;padding:18px}
 .row{display:flex;gap:10px;align-items:center}
 .sp{height:16px}
-.toast{position:fixed;left:50%;top:calc(var(--st) + 14px);transform:translate(-50%,-140%);z-index:50;background:rgba(244,232,212,.96);color:#2a0d13;
-  padding:12px 16px;border-radius:14px;font-weight:600;font-size:14px;max-width:88vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.4);transition:transform .45s cubic-bezier(.2,.9,.2,1.2)}
-.toast.on{transform:translate(-50%,0)}
+.toast{position:fixed;left:50%;top:calc(var(--st) + 14px);transform:translate(-50%,-140%);opacity:0;visibility:hidden;z-index:50;background:rgba(244,232,212,.96);color:#2a0d13;
+  padding:12px 16px;border-radius:14px;font-weight:600;font-size:14px;max-width:88vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.4);transition:transform .45s cubic-bezier(.2,.9,.2,1.2),opacity .3s,visibility .3s}
+.toast.on{transform:translate(-50%,0);opacity:1;visibility:visible}
 
 /* home */
 .hero{position:relative;border-radius:24px;overflow:hidden;height:300px;margin-top:4px}
@@ -146,7 +146,7 @@ p.sub{color:var(--mute);font-size:15px;line-height:1.5;margin-top:10px}
 .empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;gap:12px;border:1px dashed var(--line);border-radius:24px}
 
 /* match overlay */
-#match{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 26px calc(var(--sb) + 30px);
+#match{position:fixed;top:0;left:0;right:0;height:var(--h);z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 26px calc(var(--sb) + 30px);
   background:radial-gradient(circle at 50% 40%,rgba(138,35,56,.95),rgba(16,4,7,.98) 70%);opacity:0;pointer-events:none;transition:opacity .4s}
 #match.on{opacity:1;pointer-events:auto}
 #match .pair{display:flex;align-items:center;margin:26px 0}
@@ -156,7 +156,7 @@ p.sub{color:var(--mute);font-size:15px;line-height:1.5;margin-top:10px}
 #match h1{font-size:50px;text-align:center}
 #match .sub{text-align:center;max-width:320px}
 #match .btns{width:100%;max-width:340px;display:flex;flex-direction:column;gap:10px;margin-top:28px}
-#confetti{position:fixed;inset:0;z-index:41;pointer-events:none}
+#confetti{position:fixed;top:0;left:0;width:100%;height:var(--h);z-index:41;pointer-events:none}
 
 /* matches + date */
 .mlist{display:flex;flex-direction:column;gap:10px;margin-top:18px}
@@ -630,6 +630,18 @@ function confetti(){
 }
 
 /* ================= boot ================= */
+// iOS Home Screen apps can report a viewport shorter than the screen, which
+// leaves the tab bar floating with a dead band below it. Size to the screen.
+const STANDALONE=navigator.standalone||matchMedia("(display-mode: standalone)").matches;
+function fit(){
+  const r=document.documentElement.style,port=innerHeight>=innerWidth;
+  r.setProperty("--h",(STANDALONE?Math.max(innerHeight,port?screen.height:screen.width):innerHeight)+"px");
+  if(STANDALONE&&port&&screen.height>=812){
+    const t=document.createElement("div");t.style.cssText="position:fixed;padding-bottom:env(safe-area-inset-bottom)";document.body.append(t);
+    if(!parseFloat(getComputedStyle(t).paddingBottom))r.setProperty("--sb","26px");t.remove();
+  }
+}
+fit();addEventListener("resize",fit);addEventListener("orientationchange",()=>setTimeout(fit,300));
 updDot();
 $("#team").innerHTML=TEAM.map(([n,m])=>`<div><b>${n}</b>${m}</div>`).join("");
 go("home");
